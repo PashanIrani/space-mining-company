@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsc"
+    "dev": "webpack --watch",
+    "clean": "rm src/*.js && rm src/*.js.map"
   },
   "repository": {
     "type": "git",
@@ -18,5 +19,11 @@
   "homepage": "https://github.com/PashanIrani/smc#readme",
   "dependencies": {
     "typescript": "^5.0.2"
+  },
+  "devDependencies": {
+    "hook-shell-script-webpack-plugin": "^0.2.0",
+    "ts-loader": "^9.4.2",
+    "webpack": "^5.76.3",
+    "webpack-cli": "^5.0.1"
   }
 }
