@@ -8,7 +8,8 @@ const energy = new Resource({
   amount: 0,
   generateAmount: 1,
   capacity: 100,
-  costs: []
+  costs: [],
+  timeToBuildMs: 0
 })
 
 const funds = new Resource({
@@ -16,5 +17,6 @@ const funds = new Resource({
   amount: 0,
   generateAmount: 1,
   capacity: null,
-  costs: [{ resource: energy, amount: 5 }]
+  costs: [{ resource: energy, amount: 5 }],
+  timeToBuildMs: 1000
 })

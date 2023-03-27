@@ -1,4 +1,4 @@
-import { UI_displayValue } from "./ui";
+import { UI_displayValue, UI_displayText } from "./ui";
 import { Cost } from "./cost";
 
 export interface ResourceDefination {
@@ -7,6 +7,7 @@ export interface ResourceDefination {
   generateAmount: number; // The amount of resource is genereated when this resource is generated
   capacity: number; // The max capacity of this resource
   costs: Cost[]; // the cost for generating this resource
+  timeToBuildMs: number; // This is how long it would take to build this resource
 }
 export class Resource {
   readonly name: string;
@@ -14,6 +15,8 @@ export class Resource {
   private _generateAmount: number;
   private _capacity: number;
   private _costs: Cost[];
+  private _timeToBuildMs: number;
+  private _buildStatus: number; // range from 0 to 1 indicating percentage
 
   constructor(defination: ResourceDefination) {
     this.name = defination.name;
@@ -23,6 +26,7 @@ export class Resource {
     this.generateAmount = defination.generateAmount;
     this.capacity = defination.capacity;
     this.costs = defination.costs;
+    this.timeToBuildMs = defination.timeToBuildMs;
 
     this._assignEventListeners();
   }
@@ -47,7 +51,7 @@ export class Resource {
       this._amount = this.capacity;
     }
 
-    UI_displayValue(this.name, 'amount', this._amount);
+    UI_displayValue(this.name, 'amount', this.amount);
   }
 
   get capacity(): number {
@@ -56,7 +60,7 @@ export class Resource {
 
   set capacity(value: number) {
     this._capacity = value;
-    UI_displayValue(this.name, 'capacity', this._capacity);
+    UI_displayValue(this.name, 'capacity', this.capacity);
   }
 
   get costs(): Cost[] {
@@ -75,15 +79,57 @@ export class Resource {
     this._generateAmount = value;
   }
 
+  get timeToBuildMs(): number {
+    return this._timeToBuildMs;
+  }
+
+  set timeToBuildMs(value: number) {
+    this._timeToBuildMs = value;
+  }
+
+  get buildStatus(): number {
+    return this._buildStatus;
+  }
+
+  set buildStatus(value: number) {
+    this._buildStatus = value;
+    if (this.buildStatus == 0) {
+      UI_displayText(this.name, 'buildStatus', '');
+    } else {
+      UI_displayText(this.name, 'buildStatus', `${Math.round(this.buildStatus * 100)}%`);
+    }
+  }
+
   // Generates the resource, returns true or false based on if it was a success.
   generate(): boolean {
     if (this.canAffordGeneration()) {
       this.performCostTransaction();
-      this.amount += this.generateAmount;
+      if (this.timeToBuildMs > 0) {
+        const timePerPercent = this.timeToBuildMs / 100; // the frequency of build percentage update
+
+        this.buildStatus = 0;
+        const percentTickInterval = setInterval(() => {
+          this.buildStatus += 0.01;
+        }, timePerPercent);
+
+        setTimeout(() => {
+          this.build();
+          clearInterval(percentTickInterval);
+          this.buildStatus = 0;
+        }, this.timeToBuildMs);
+
+      } else {
+        this.build();
+      }
+
       return true;
     }
 
     return false;
+  }
+
+  build() {
+    this.amount += this.generateAmount;
   }
 
   // checks if all the costs are met
