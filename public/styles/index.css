@@ -9,7 +9,13 @@
   font-weight: bold;
 }
 
+.glitch-fx {
+  opacity: 0.65 !important;
+
+}
+
 body {
+  background-color: #3c6ea5;
   font-family: "Pixelated MS Sans Serif", Arial;
   -webkit-font-smoothing: antialiased;
 

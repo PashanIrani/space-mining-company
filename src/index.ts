@@ -1,6 +1,6 @@
 import { Resource } from "./resource"
 import { Time } from './time'
-
+import { applyRandomClass } from "./ui"
 // const energy = new Resource({ name: 'energy', 0, 10, []});
 // const funds = new Resource('funds', 0, 100, [{ resource: energy, amount: 5 }]);
 
@@ -31,3 +31,7 @@ const rest = new Resource({
 });
 
 const timeManager = new Time(0, new Date(), timeDelta);
+
+for (let i = 0; i < 12; i++) {
+  applyRandomClass();
+}
