@@ -5,9 +5,10 @@ export interface ResourceDefination {
   name: string; // name is used for linking things together
   amount: number; // the actual value of this resource at the current instance
   generateAmount: number; // The amount of resource is genereated when this resource is generated
-  capacity: number; // The max capacity of this resource
+  capacity?: number; // The max capacity of this resource
   costs: Cost[]; // the cost for generating this resource
   timeToBuildMs: number; // This is how long it would take to build this resource
+  afterNewGeneration?: Function; // Function that runs after a new generation is complete
 }
 export class Resource {
   readonly name: string;
@@ -44,12 +45,11 @@ export class Resource {
   }
 
   set amount(value: number) {
-    this._amount = value;
-
-    // check if gone over capacity
-    if (this._capacity != null && this._amount > this._capacity) {
-      this._amount = this.capacity;
+    if (value > this.capacity) {
+      return;
     }
+
+    this._amount = value;
 
     UI_displayValue(this.name, 'amount', this.amount);
   }
@@ -135,12 +135,18 @@ export class Resource {
     return false;
   }
 
+  //! Only run after it is fully okay to build after checks with canAffordGeneration() and ONLY after performCostTransaction()
   build() {
     this.amount += this.generateAmount;
+
   }
 
   // checks if all the costs are met
   canAffordGeneration(): boolean {
+    if (this.amount + 1 > this.capacity) {
+      return false;
+    }
+
     for (let i = 0; i < this.costs.length; i++) {
       const cost = this.costs[i];
 

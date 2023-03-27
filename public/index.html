@@ -7,62 +7,43 @@
 </head>
 
 <body>
-
-
-  <div>
-    <span id="labor-buildStatus"></span>
-    (<span id="labor-amount"></span>
-    <span id="labor-capacity"></span>)
-    <button id="labor-generate-button">labor</button>
-    Cost: <span id="labor-costs"></span>
-  </div>
-
-  <div>
-    <span id="wood-buildStatus"></span>
-    (<span id="wood-amount"></span>
-    <span id="wood-capacity"></span>)
-    <button id="wood-generate-button">wood</button>
-    Cost: <span id="wood-costs"></span>
-  </div>
-
-  <div>
-    <span id="gold-buildStatus"></span>
-    (<span id="gold-amount"></span>
-    <span id="gold-capacity"></span>)
-    <button id="gold-generate-button">gold</button>
-    Cost: <span id="gold-costs"></span>
-  </div>
-
-  <div>
-    <span id="food-buildStatus"></span>
-    (<span id="food-amount"></span>
-    <span id="food-capacity"></span>)
-    <button id="food-generate-button">food</button>
-    Cost: <span id="food-costs"></span>
-  </div>
-
-  <div>
-    <span id="stone-buildStatus"></span>
-    (<span id="stone-amount"></span>
-    <span id="stone-capacity"></span>)
-    <button id="stone-generate-button">stone</button>
-    Cost: <span id="stone-costs"></span>
-  </div>
-
-  <div>
-    <span id="iron-buildStatus"></span>
-    (<span id="iron-amount"></span>
-    <span id="iron-capacity"></span>)
-    <button id="iron-generate-button">iron</button>
-    Cost: <span id="iron-costs"></span>
-  </div>
-
-  <div>
-    <span id="oil-buildStatus"></span>
-    (<span id="oil-amount"></span>
-    <span id="oil-capacity"></span>)
-    <button id="oil-generate-button">oil</button>
-    Cost: <span id="oil-costs"></span>
+  <div class="header"></div>
+  <div class="row">
+    <div class="window" style="width: 300px">
+      <div class="title-bar">
+        <div class="title-bar-text">You</div>
+        <div class="title-bar-controls">
+          <button aria-label="Minimize"></button>
+          <button aria-label="Maximize"></button>
+          <button aria-label="Close"></button>
+        </div>
+      </div>
+      <div class="window-body">
+        <p>Name: null</p>
+        <p>Joined: <span id="time-startDate"></span> (Δ +<span id="timeDelta-amount"></span> hr)</p>
+        <button id="rest-generate-button">Rest</button>
+      </div>
+    </div>
+    <div class="window" style="width: 300px">
+      <div class="title-bar">
+        <div class="title-bar-text">Labor</div>
+        <div class="title-bar-controls">
+          <button aria-label="Minimize"></button>
+          <button aria-label="Maximize"></button>
+          <button aria-label="Close"></button>
+        </div>
+      </div>
+      <div class="window-body">
+        <p>The physical exertion of biological beings or machines, utilized to manifest their will upon the
+          environment
+          and bring
+          forth technological progress.</p>
+        <span id="labor-buildStatus"></span>
+        (<span id="labor-amount"></span>
+        <span id="labor-capacity"></span>)
+        <button id="labor-generate-button">Spend +1/hr</button>
+      </div>
+    </div>
   </div>
   <script src="/scripts/index.js"></script>
 </body>

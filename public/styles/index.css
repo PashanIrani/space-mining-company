@@ -12,4 +12,20 @@
 body {
   font-family: "Pixelated MS Sans Serif", Arial;
   -webkit-font-smoothing: antialiased;
+
+}
+
+.header {
+  height: 250px;
+}
+
+.row {
+  display: flex;
+  justify-content: center;
+}
+
+.window {
+  margin: auto;
+  margin: 25px;
+  font-size: 13px;
 }
