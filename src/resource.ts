@@ -69,6 +69,13 @@ export class Resource {
 
   set costs(value: Cost[]) {
     this._costs = value;
+
+    let costDisplayText = "";
+    for (let i = 0; i < this.costs.length; i++) {
+      const cost = this.costs[i];
+      costDisplayText += `[${cost.resource.name}: ${cost.amount}]`
+    }
+    UI_displayText(this.name, 'costs', costDisplayText);
   }
 
   get generateAmount(): number {
