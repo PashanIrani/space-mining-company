@@ -22,7 +22,18 @@
         <p>Name: null</p>
         <p>Joined: <span id="time-startDate"></span> </p>
         <p>Time since (joining): Δ +<span id="timeDelta-amount"></span> hr</p>
-        <button id="rest-generate-button">Rest</button>
+        <p>
+          Energy:
+          <span id="energy-buildStatus"></span><span id="energy-amount"></span>/
+          <span id="energy-capacity"></span>
+          <button id="energy-generate-button">Rest</button>
+        </p>
+        <p>
+          Energy2:
+          <span id="energy2-buildStatus"></span><span id="energy2-amount"></span>/
+          <span id="energy2-capacity"></span>
+          <button id="energy2-generate-button">Rest</button>
+        </p>
       </div>
     </div>
 
@@ -43,10 +54,15 @@
           environment
           and bring
           forth technological progress.</p>
-        <span id="labor-buildStatus"></span>
-        (<span id="labor-amount"></span>
-        <span id="labor-capacity"></span>)
-        <button id="labor-generate-button">Spend +1/hr</button>
+
+        <p>HUmans: <span id="humans-amount"></span></p>
+        Allocatable Work Hours: <span id="workHours-amount"></span>
+        <p>
+          Human Work Hours:
+          <span id="humanWorkHours-buildStatus"></span><span id="humanWorkHours-amount"></span>/
+          <span id="humanWorkHours-capacity"></span>
+          <button id="humanWorkHours-generate-button">+</button>
+        </p>
       </div>
     </div>
   </div>

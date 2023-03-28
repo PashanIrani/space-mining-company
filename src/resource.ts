@@ -9,7 +9,14 @@ export interface ResourceDefination {
   costs: Cost[]; // the cost for generating this resource
   timeToBuildMs: number; // This is how long it would take to build this resource
   afterNewGeneration?: Function; // Function that runs after a new generation is complete
+  afterDeduction?: Function; // Function that runs after this resource is deducted for a transaction
 }
+
+export interface GroupResouceDefination {
+  name: string,
+  groupResources: Resource[]
+}
+
 export class Resource {
   readonly name: string;
   private _amount: number;
@@ -18,6 +25,8 @@ export class Resource {
   private _costs: Cost[];
   private _timeToBuildMs: number;
   private _buildStatus: number; // range from 0 to 1 indicating percentage
+  private _afterNewGeneration: Function;
+  private _afterDeduction: Function;
 
   constructor(defination: ResourceDefination) {
     this.name = defination.name;
@@ -29,8 +38,13 @@ export class Resource {
     this.costs = defination.costs;
     this.timeToBuildMs = defination.timeToBuildMs;
 
+
+    // this._afterNewGeneration = defination.afterNewGeneration ? defination.afterNewGeneration : () => { };
+    // this._afterDeduction = defination.afterDeduction ? defination.afterDeduction : () => { };
+
     this._assignEventListeners();
   }
+
 
   private _assignEventListeners() {
     const generateButton = document.getElementById(`${this.name}-generate-button`);
@@ -109,6 +123,7 @@ export class Resource {
 
   // Generates the resource, returns true or false based on if it was a success.
   generate(): boolean {
+    let success = false;
     if (this.canAffordGeneration()) {
       this.performCostTransaction();
       if (this.timeToBuildMs > 0) {
@@ -129,7 +144,7 @@ export class Resource {
         this.build();
       }
 
-      return true;
+      success = true;
     }
 
     return false;
@@ -138,7 +153,7 @@ export class Resource {
   //! Only run after it is fully okay to build after checks with canAffordGeneration() and ONLY after performCostTransaction()
   build() {
     this.amount += this.generateAmount;
-
+    // this._afterNewGeneration();
   }
 
   // checks if all the costs are met
@@ -167,9 +182,95 @@ export class Resource {
         return false;
       }
 
-      cost.resource.amount -= cost.amount;
+      cost.resource.performDeduction(cost.amount);
+
+      // If Resouce is a GroupResouce, then deduct values from what it's a group of.
+      if (cost.resource instanceof GroupResource) {
+
+      } else {
+        cost.resource.amount -= cost.amount;
+      }
     }
 
     return true;
+  }
+
+  performDeduction(amountToDeduct: number) {
+    this.amount -= amountToDeduct;
+    // this._afterDeduction();
+  }
+}
+
+export class GroupResource extends Resource {
+  private _groupResources: Resource[]; // range from 0 to 1 indicating percentage
+  private _lastAccessedResource: number = 0;
+
+  constructor(defination: GroupResouceDefination) {
+    // send some dummy data that won't really be used through a GroupResource
+    super({
+      name: defination.name,
+      amount: 0,
+      generateAmount: 1,
+      costs: [],
+      timeToBuildMs: 0,
+    });
+
+    this._groupResources = defination.groupResources;
+    setInterval(this.calculateTotalAmount.bind(this), 100);
+  }
+
+  private calculateTotalAmount() {
+    let sum = 0;
+
+    for (let i = 0; i < this._groupResources.length; i++) {
+      sum += this._groupResources[i].amount;
+    }
+
+    this.amount = sum;
+  }
+
+  get groupResources(): Resource[] {
+    return this._groupResources;
+  }
+
+  set groupResources(value: Resource[]) {
+    this._groupResources = value;
+  }
+
+  get lastAccessedResource(): number {
+    return this._lastAccessedResource;
+  }
+
+  set lastAccessedResource(value: number) {
+    this._lastAccessedResource = value;
+  }
+
+  performDeduction(amountToDeduct: number) {
+    // Get index of which resource to deduct from next
+    let firstResouceToCheck = this.lastAccessedResource + 1 <= this.groupResources.length - 1
+      ? this.lastAccessedResource + 1
+      : 0;
+
+    let run = true;
+    let i = firstResouceToCheck;
+    while (run) {
+
+      console.log(this.name, i);
+      if (i >= this.groupResources.length) {
+        i = 0;
+      }
+
+      const resourceOf = this.groupResources[i];
+      console.log(resourceOf.amount >= amountToDeduct);
+
+      if (resourceOf.amount >= amountToDeduct) {
+        this.lastAccessedResource = i;
+        resourceOf.performDeduction(amountToDeduct);
+        run = false;
+      }
+      i++;
+    }
+
+
   }
 }

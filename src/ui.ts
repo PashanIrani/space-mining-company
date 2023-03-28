@@ -1,6 +1,6 @@
 import { randomIntFromInterval } from "./helpers";
 
-export function UI_displayValue(name: string, valueType: string, value: number) {
+export function UI_displayValue(name: string, valueType: string, value: number, decimals: number = 3) {
   const element = document.getElementById(`${name}-${valueType}`);
 
   if (element && value != null)
