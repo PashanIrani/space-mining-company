@@ -1,0 +1,62 @@
+@font-face {
+  font-family: "Pixelated MS Sans Serif";
+  src: url('../../public/styles/ms_sans_serif.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: "Pixelated MS Sans Serif";
+  src: url('../../public/styles/ms_sans_serif_bold.woff2') format('woff2');
+  font-weight: bold;
+}
+
+* {
+  user-select: none;
+}
+
+.glitch-fx {
+  opacity: 0.65 !important;
+  transition: all 0.2s;
+}
+
+body {
+  background-color: #3c6ea5;
+  font-family: "Pixelated MS Sans Serif", Arial;
+  -webkit-font-smoothing: antialiased;
+  // font-size: ;
+
+}
+
+.header {
+  height: 250px;
+}
+
+.row {
+  display: flex;
+  justify-content: center;
+}
+
+.window {
+  max-width: 800px;
+  width: 100%;
+  margin: 25px;
+  font-size: 16px;
+}
+
+.window-body {
+  padding: 5px;
+}
+
+.progress-bar-container {
+  progress {
+    width: 100%;
+  }
+
+  margin: 10px;
+}
+
+
+.button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin: 10px 10px 0px 0px;
+}

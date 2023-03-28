@@ -14,19 +14,25 @@ export function UI_displayText(name: string, valueType: string, text: string) {
     element.innerHTML = text;
 }
 
-export function applyRandomClass() {
+export function UI_updateProgressBar(name: string, amount: number = 0, capacity: number = 1) {
+  const element = document.getElementById(`${name}-progress-bar`);
+
+  if (element) {
+    element.innerHTML = `<progress max="${capacity}" value="${amount}"></progress>`
+  }
+}
+
+export function doGlitchEffect() {
   const elements = document.querySelectorAll('*:not(body):not(html)');
   const randomIndex = Math.floor(Math.random() * elements.length);
   const element = elements[randomIndex];
 
-  // Apply the random class for a random time between 50ms and 10ms
   const randomTime = randomIntFromInterval(10, 50)
   element.classList.add('glitch-fx');
   setTimeout(() => {
     element.classList.remove('glitch-fx');
   }, randomTime);
 
-  // Call this function again after a random time between 3 and 20 seconds
   const randomInterval = randomIntFromInterval(10, 15000)
-  setTimeout(applyRandomClass, randomInterval);
+  setTimeout(doGlitchEffect, randomInterval);
 }

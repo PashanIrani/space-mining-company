@@ -1,4 +1,4 @@
-import { UI_displayValue, UI_displayText } from "./ui";
+import { UI_displayValue, UI_displayText, UI_updateProgressBar } from "./ui";
 import { Cost } from "./cost";
 
 export interface ResourceDefination {
@@ -27,6 +27,7 @@ export class Resource {
   private _buildStatus: number; // range from 0 to 1 indicating percentage
   private _afterNewGeneration: Function;
   private _afterDeduction: Function;
+  private _ratePerSec: number;
 
   constructor(defination: ResourceDefination) {
     this.name = defination.name;
@@ -39,18 +40,59 @@ export class Resource {
     this.timeToBuildMs = defination.timeToBuildMs;
 
 
-    // this._afterNewGeneration = defination.afterNewGeneration ? defination.afterNewGeneration : () => { };
-    // this._afterDeduction = defination.afterDeduction ? defination.afterDeduction : () => { };
+    this._afterNewGeneration = defination.afterNewGeneration ? defination.afterNewGeneration : () => { };
+    this._afterDeduction = defination.afterDeduction ? defination.afterDeduction : () => { };
 
-    this._assignEventListeners();
+    this.assignEventListeners();
+    this.initRateCalculation();
+  }
+
+  private initRateCalculation() {
+    let prevValue = this.amount;
+    setInterval(() => {
+      let rate = this.calculateRate(prevValue, this.amount);
+
+      let timeLeftText = null;
+      if (rate < 0) {
+        timeLeftText = `${(this.amount / (rate * -1)).toFixed(2)}s left`;
+      }
+
+      if (rate > 0 && this.capacity) {
+        timeLeftText = `${((this.capacity - this.amount) / rate).toFixed(2)}s to full`;
+      }
+
+
+      UI_displayText(this.name, 'rate', `${rate > 0 ? '+' : ''}${rate}/s ${timeLeftText != null ? `(${timeLeftText})` : ''}`);
+      prevValue = this.amount;
+    }, 1000);
   }
 
 
-  private _assignEventListeners() {
+  private calculateRate(prevValue: number, currentValue: number) {
+    return currentValue - prevValue;
+  }
+
+  private assignEventListeners() {
     const generateButton = document.getElementById(`${this.name}-generate-button`);
 
     if (generateButton) {
       generateButton.addEventListener('click', this.generate.bind(this))
+
+      let intervalId: NodeJS.Timeout;
+
+      generateButton.addEventListener('mousedown', () => {
+        intervalId = setInterval(() => {
+          generateButton.click();
+        }, 250);
+      });
+
+      generateButton.addEventListener('mouseup', () => {
+        clearInterval(intervalId);
+      });
+
+      generateButton.addEventListener('mouseleave', () => {
+        clearInterval(intervalId);
+      });
     }
   }
 
@@ -66,6 +108,7 @@ export class Resource {
     this._amount = value;
 
     UI_displayValue(this.name, 'amount', this.amount);
+    UI_updateProgressBar(this.name, this.amount, this.capacity);
   }
 
   get capacity(): number {
@@ -75,6 +118,7 @@ export class Resource {
   set capacity(value: number) {
     this._capacity = value;
     UI_displayValue(this.name, 'capacity', this.capacity);
+    UI_updateProgressBar(this.name, this.amount, this.capacity);
   }
 
   get costs(): Cost[] {
@@ -152,8 +196,10 @@ export class Resource {
 
   //! Only run after it is fully okay to build after checks with canAffordGeneration() and ONLY after performCostTransaction()
   build() {
+    console.log('build!');
+
     this.amount += this.generateAmount;
-    // this._afterNewGeneration();
+    this._afterNewGeneration();
   }
 
   // checks if all the costs are met
@@ -183,13 +229,6 @@ export class Resource {
       }
 
       cost.resource.performDeduction(cost.amount);
-
-      // If Resouce is a GroupResouce, then deduct values from what it's a group of.
-      if (cost.resource instanceof GroupResource) {
-
-      } else {
-        cost.resource.amount -= cost.amount;
-      }
     }
 
     return true;
@@ -197,7 +236,7 @@ export class Resource {
 
   performDeduction(amountToDeduct: number) {
     this.amount -= amountToDeduct;
-    // this._afterDeduction();
+    this._afterDeduction();
   }
 }
 

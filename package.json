@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "webpack --watch",
+    "start": "http-server -c-1",
     "clean": "rm src/*.js && rm src/*.js.map"
   },
   "repository": {
@@ -21,7 +22,12 @@
     "typescript": "^5.0.2"
   },
   "devDependencies": {
+    "css-loader": "^6.7.3",
     "hook-shell-script-webpack-plugin": "^0.2.0",
+    "mini-css-extract-plugin": "^2.7.5",
+    "sass": "^1.60.0",
+    "sass-loader": "^13.2.2",
+    "style-loader": "^3.3.2",
     "ts-loader": "^9.4.2",
     "webpack": "^5.76.3",
     "webpack-cli": "^5.0.1"

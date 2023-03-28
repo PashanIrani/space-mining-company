@@ -22,7 +22,7 @@ export class Time {
     const formattedDateTime = `${formattedDate} ${formattedTime}`;
 
     UI_displayText('time', 'startDate', formattedDateTime);
-
+    
     setInterval(() => {
       timeDeltaResource.amount += 0.016667; // one day every 20 mins
     }, 60 * 1000);
@@ -39,7 +39,6 @@ export class Time {
     console.log('huh');
 
   }
-
 
   addHours(hours: number) {
     this.delta += hours;

@@ -1,17 +1,16 @@
 <html>
 
 <head>
-  <title>RD: Space Mining Company</title>
+  <title>Space Mining Company</title>
   <link rel="stylesheet" href="/styles/xp.css" />
-  <link rel="stylesheet" href="/styles/index.css" />
 </head>
 
 <body>
   <div class="header"></div>
   <div class="row">
-    <div class="window" style="width: 300px">
+    <div class="window">
       <div class="title-bar">
-        <div class="title-bar-text">null (You)</div>
+        <div class="title-bar-text">Energy</div>
         <div class="title-bar-controls">
           <button aria-label="Minimize"></button>
           <button aria-label="Maximize"></button>
@@ -19,30 +18,28 @@
         </div>
       </div>
       <div class="window-body">
-        <p>Name: null</p>
-        <p>Joined: <span id="time-startDate"></span> </p>
-        <p>Time since (joining): Δ +<span id="timeDelta-amount"></span> hr</p>
-        <p>
-          Energy:
-          <span id="energy-buildStatus"></span><span id="energy-amount"></span>/
+        <p>The lifeblood of progress, without it, all crumbles.</p>
+        <p>Energy: <span id="energy-buildStatus"></span><span id="energy-amount"></span>/
           <span id="energy-capacity"></span>
-          <button id="energy-generate-button">Rest</button>
         </p>
-        <p>
-          Energy2:
-          <span id="energy2-buildStatus"></span><span id="energy2-amount"></span>/
-          <span id="energy2-capacity"></span>
-          <button id="energy2-generate-button">Rest</button>
-        </p>
+        <div class="progress-bar-container"><span id="energy-progress-bar"></span></div>
+
+        <div class="button-container">
+          <button id="energy-generate-button">Generate Energy</button>
+        </div>
+
+      </div>
+      <div class="status-bar">
+        <p class="status-bar-field">Rate: <span id="energy-rate"></span></p>
       </div>
     </div>
 
   </div>
 
   <div class="row">
-    <div class="window" style="width: 300px">
+    <div class="window">
       <div class="title-bar">
-        <div class="title-bar-text">Labor</div>
+        <div class="title-bar-text">Funds</div>
         <div class="title-bar-controls">
           <button aria-label="Minimize"></button>
           <button aria-label="Maximize"></button>
@@ -50,23 +47,20 @@
         </div>
       </div>
       <div class="window-body">
-        <p>The physical exertion of biological beings or machines, utilized to manifest their will upon the
-          environment
-          and bring
-          forth technological progress.</p>
-
-        <p>HUmans: <span id="humans-amount"></span></p>
-        Allocatable Work Hours: <span id="workHours-amount"></span>
-        <p>
-          Human Work Hours:
-          <span id="humanWorkHours-buildStatus"></span><span id="humanWorkHours-amount"></span>/
-          <span id="humanWorkHours-capacity"></span>
-          <button id="humanWorkHours-generate-button">+</button>
+        <p>The lifeblood of progress, without it, all crumbles.</p>
+        <p>Funds: <span id="funds-buildStatus"></span><span id="funds-amount"></span>
         </p>
+
+        <div class="funds-container">
+          <button id="funds-generate-button">Generate Funds</button>
+        </div>
+
+      </div>
+      <div class="status-bar">
+        <p class="status-bar-field">Rate: <span id="funds-rate"></span></p>
       </div>
     </div>
-  </div>
-  <script src="/scripts/index.js"></script>
+    <script src="/scripts/index.js"></script>
 </body>
 
 </html>

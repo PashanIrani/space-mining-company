@@ -11,11 +11,20 @@ module.exports = {
     extensions: [".ts", ".js"],
   },
   module: {
-    rules: [{ test: /\.ts$/, loader: "ts-loader" }],
+    rules: [{ test: /\.ts$/, loader: "ts-loader" },
+    {
+      test: /\.s[ac]ss$/i,
+      use: [
+        'style-loader',
+        'css-loader',
+        'sass-loader',
+      ],
+    }],
   },
   plugins: [
     new HookShellScriptPlugin({
       afterEmit: ["npm run clean"],
     }),
+
   ],
 };
