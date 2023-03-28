@@ -22,6 +22,27 @@ export function UI_updateProgressBar(name: string, amount: number = 0, capacity:
   }
 }
 
+export function UI_showWindow(name: string) {
+  const element = document.getElementById(`${name}-window`);
+
+  if (element) {
+    console.log(element.style);
+
+
+    element.style.display = 'block';
+  }
+}
+
+export function UI_hideWindow(name: string) {
+  const element = document.getElementById(`${name}-window`);
+
+  if (element) {
+    console.log(element.style);
+
+    element.style.display = 'none';
+  }
+}
+
 export function doGlitchEffect() {
   const elements = document.querySelectorAll('*:not(body):not(html)');
   const randomIndex = Math.floor(Math.random() * elements.length);

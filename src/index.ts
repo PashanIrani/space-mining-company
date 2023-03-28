@@ -2,6 +2,7 @@ import { Resource, GroupResource } from "./resource"
 import { Time } from './time'
 import { doGlitchEffect } from "./ui"
 import './styles/index.scss';
+import { PacingManger } from "./pacingManager";
 
 const energy = new Resource({
   name: 'energy',
@@ -23,3 +24,6 @@ const funds = new Resource({
 for (let i = 0; i < 12; i++) {
   doGlitchEffect();
 }
+
+const pm = new PacingManger({ energy, funds });
+setInterval(pm.check.bind(pm), 1000);
