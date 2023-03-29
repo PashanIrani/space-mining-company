@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "webpack --watch",
+    "build": "webpack",
     "start": "http-server -c-1",
     "clean": "rm src/*.js && rm src/*.js.map"
   },

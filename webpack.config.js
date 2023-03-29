@@ -21,10 +21,10 @@ module.exports = {
       ],
     }],
   },
-  plugins: [
-    new HookShellScriptPlugin({
-      afterEmit: ["npm run clean"],
-    }),
+  // plugins: [
+  //   new HookShellScriptPlugin({
+  //     afterEmit: ["npm run clean"],
+  //   }),
 
-  ],
+  // ],
 };
