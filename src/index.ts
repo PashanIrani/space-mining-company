@@ -21,9 +21,9 @@ const funds = new Resource({
   timeToBuildMs: 0,
 });
 
-for (let i = 0; i < 12; i++) {
-  doGlitchEffect();
-}
+// for (let i = 0; i < 12; i++) {
+  // doGlitchEffect();
+// }
 
 const pm = new PacingManger({ energy, funds });
 setInterval(pm.check.bind(pm), 1000);
