@@ -1,6 +1,7 @@
 import { UI_displayValue, UI_displayText, UI_updateProgressBar } from "./ui";
 import { Cost } from "./cost";
 
+
 export interface ResourceDefination {
   name: string; // name is used for linking things together
   amount: number; // the actual value of this resource at the current instance
@@ -10,6 +11,7 @@ export interface ResourceDefination {
   timeToBuildMs: number; // This is how long it would take to build this resource
   afterNewGeneration?: Function; // Function that runs after a new generation is complete
   afterDeduction?: Function; // Function that runs after this resource is deducted for a transaction
+  holdToGenerateEnabled?: boolean;
 }
 
 export interface GroupResouceDefination {
@@ -28,6 +30,7 @@ export class Resource {
   private _afterNewGeneration: Function;
   private _afterDeduction: Function;
   private _ratePerSec: number;
+  private _holdTogenerateEnabled: boolean;
 
   constructor(defination: ResourceDefination) {
     this.name = defination.name;
@@ -38,7 +41,7 @@ export class Resource {
     this.capacity = defination.capacity;
     this.costs = defination.costs;
     this.timeToBuildMs = defination.timeToBuildMs;
-
+    this._holdTogenerateEnabled = defination.holdToGenerateEnabled || false;
 
     this._afterNewGeneration = defination.afterNewGeneration ? defination.afterNewGeneration : () => { };
     this._afterDeduction = defination.afterDeduction ? defination.afterDeduction : () => { };
@@ -80,19 +83,21 @@ export class Resource {
 
       let intervalId: NodeJS.Timeout;
 
-      generateButton.addEventListener('mousedown', () => {
-        intervalId = setInterval(() => {
-          generateButton.click();
-        }, 250);
-      });
+      if (this._holdTogenerateEnabled) {
+        generateButton.addEventListener('mousedown', () => {
+          intervalId = setInterval(() => {
+            generateButton.click();
+          }, 250);
+        });
 
-      generateButton.addEventListener('mouseup', () => {
-        clearInterval(intervalId);
-      });
+        generateButton.addEventListener('mouseup', () => {
+          clearInterval(intervalId);
+        });
 
-      generateButton.addEventListener('mouseleave', () => {
-        clearInterval(intervalId);
-      });
+        generateButton.addEventListener('mouseleave', () => {
+          clearInterval(intervalId);
+        });
+      }
     }
   }
 
@@ -102,10 +107,10 @@ export class Resource {
 
   set amount(value: number) {
     if (value > this.capacity) {
-      return;
+      this._amount = this.capacity;
+    } else {
+      this._amount = value;
     }
-
-    this._amount = value;
 
     UI_displayValue(this.name, 'amount', this.amount);
     UI_updateProgressBar(this.name, this.amount, this.capacity);
@@ -131,7 +136,10 @@ export class Resource {
     let costDisplayText = "";
     for (let i = 0; i < this.costs.length; i++) {
       const cost = this.costs[i];
-      costDisplayText += `[${cost.resource.name}: ${cost.amount}]`
+      costDisplayText += `${cost.resource.name.charAt(0).toUpperCase() + cost.resource.name.slice(1).toLowerCase()} (${cost.amount})`
+      if (i < this.costs.length - 1) {
+        costDisplayText += ", ";
+      }
     }
     UI_displayText(this.name, 'costs', costDisplayText);
   }
@@ -191,23 +199,17 @@ export class Resource {
       success = true;
     }
 
-    return false;
+    return success;
   }
 
   //! Only run after it is fully okay to build after checks with canAffordGeneration() and ONLY after performCostTransaction()
   build() {
-    console.log('build!');
-
     this.amount += this.generateAmount;
     this._afterNewGeneration();
   }
 
   // checks if all the costs are met
   canAffordGeneration(): boolean {
-    if (this.amount + 1 > this.capacity) {
-      return false;
-    }
-
     for (let i = 0; i < this.costs.length; i++) {
       const cost = this.costs[i];
 
@@ -294,13 +296,11 @@ export class GroupResource extends Resource {
     let i = firstResouceToCheck;
     while (run) {
 
-      console.log(this.name, i);
       if (i >= this.groupResources.length) {
         i = 0;
       }
 
       const resourceOf = this.groupResources[i];
-      console.log(resourceOf.amount >= amountToDeduct);
 
       if (resourceOf.amount >= amountToDeduct) {
         this.lastAccessedResource = i;

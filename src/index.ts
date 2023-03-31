@@ -7,7 +7,7 @@ import { PacingManger } from "./pacingManager";
 const energy = new Resource({
   name: 'energy',
   amount: 0,
-  generateAmount: 1,
+  generateAmount: 10,
   capacity: 100,
   costs: [],
   timeToBuildMs: 0,
@@ -21,9 +21,7 @@ const funds = new Resource({
   timeToBuildMs: 0,
 });
 
-// for (let i = 0; i < 12; i++) {
-  // doGlitchEffect();
-// }
+
 
 const pm = new PacingManger({ energy, funds });
 setInterval(pm.check.bind(pm), 1000);

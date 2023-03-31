@@ -26,9 +26,6 @@ export function UI_showWindow(name: string) {
   const element = document.getElementById(`${name}-window`);
 
   if (element) {
-    console.log(element.style);
-
-
     element.style.display = 'block';
   }
 }
