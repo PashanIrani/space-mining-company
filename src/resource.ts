@@ -175,31 +175,29 @@ export class Resource {
 
   // Generates the resource, returns true or false based on if it was a success.
   generate(): boolean {
-    let success = false;
-    if (this.canAffordGeneration()) {
-      this.performCostTransaction();
-      if (this.timeToBuildMs > 0) {
-        const timePerPercent = this.timeToBuildMs / 100; // the frequency of build percentage update
+    if (!this.canAffordGeneration()) return false;
 
-        this.buildStatus = 0;
-        const percentTickInterval = setInterval(() => {
-          this.buildStatus += 0.01;
-        }, timePerPercent);
+    this.performCostTransaction();
 
-        setTimeout(() => {
-          this.build();
-          clearInterval(percentTickInterval);
-          this.buildStatus = 0;
-        }, this.timeToBuildMs);
+    if (this.timeToBuildMs > 0) {
+      const timePerPercent = this.timeToBuildMs / 100; // the frequency of build percentage update
 
-      } else {
+      this.buildStatus = 0;
+      const percentTickInterval = setInterval(() => {
+        this.buildStatus += 0.01;
+      }, timePerPercent);
+
+      setTimeout(() => {
         this.build();
-      }
+        clearInterval(percentTickInterval);
+        this.buildStatus = 0;
+      }, this.timeToBuildMs);
 
-      success = true;
+    } else {
+      this.build();
     }
 
-    return success;
+    return true;
   }
 
   //! Only run after it is fully okay to build after checks with canAffordGeneration() and ONLY after performCostTransaction()

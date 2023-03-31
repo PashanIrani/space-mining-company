@@ -18,7 +18,7 @@ const funds = new Resource({
   amount: 0,
   generateAmount: 1,
   costs: [{ resource: energy, amount: 1 }],
-  timeToBuildMs: 0,
+  timeToBuildMs: 2000,
 });
 
 
