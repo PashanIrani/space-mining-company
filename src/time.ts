@@ -1,46 +1,101 @@
 import { Resource } from "./resource";
 import { UI_displayValue, UI_displayText } from "./ui";
 
+const DAYS_PER_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+const MAX_MINUTE = 59;
+const MAX_HOUR = 23;
+const MAX_MONTH = 12;
+
 export class Time {
-  private _delta: number;
-  private _startDate: Date;
-  constructor(startDelta: number = 0, startDate: Date, timeDeltaResource: Resource) {
-    this.delta = startDelta;
-
-    this._startDate = startDate;
-
-    const date = this._startDate;
-    const year = date.getFullYear().toString().slice(2);
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-
-    // Format the date and time with a retro sci-fi feel
-    const formattedDate = `${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}-${year}`;
-    const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-    const formattedDateTime = `${formattedDate} ${formattedTime}`;
-
-    UI_displayText('time', 'startDate', formattedDateTime);
-    
-    setInterval(() => {
-      timeDeltaResource.amount += 0.016667; // one day every 20 mins
-    }, 60 * 1000);
-  }
+  private _minute: number;
+  private _hour: number;
+  private _day: number;
+  private _month: number;
+  private _year: number;
 
 
-  get delta(): number {
-    return this._delta;
-  }
+  constructor(minute: number = 0, hour: number = 0, day: number = 1, month: number = 1, year: number = 0) {
+    this.minute = minute;
+    this.hour = hour;
+    this.day = day;
+    this.month = month;
+    this.year = year;
 
-  set delta(newValue: number) {
-    this._delta = newValue;
-    UI_displayValue('time', 'delta', this.delta);
-    console.log('huh');
+    this.startTime();
 
   }
 
-  addHours(hours: number) {
-    this.delta += hours;
+  get minute() {
+    return this._minute;
+  }
+
+  set minute(value: number) {
+    if (value == MAX_MINUTE + 1) {
+      value = 0;
+      this.hour++;
+    }
+
+    this._minute = value;
+    UI_displayValue('time', 'minuteValue', this._minute, 0, 2);
+  }
+
+  get hour() {
+    return this._hour;
+  }
+
+  set hour(value: number) {
+    if (value == MAX_HOUR + 1) {
+      value = 0;
+      this.day++;
+    }
+
+    this._hour = value;
+    UI_displayValue('time', 'hourValue', this._hour, 0, 2);
+  }
+
+  get day() {
+    return this._day;
+  }
+
+  set day(value: number) {
+    if (value == DAYS_PER_MONTH[this.month - 1] + 1) {
+      value = 1; // first day is 1 not 0 bro
+      this.month++;
+    }
+    this._day = value;
+    UI_displayValue('time', 'dayValue', this._day);
+  }
+
+  get month() {
+    return this._month;
+  }
+
+  set month(value: number) {
+    if (value == MAX_MONTH + 1) {
+      value = 1; // first month is also a 1 not 0
+      this.year++;
+    }
+
+    this._month = value;
+    UI_displayValue('time', 'monthValue', this._month);
+  }
+
+  get year() {
+    return this._year;
+  }
+
+  set year(value: number) {
+    this._year = value;
+    UI_displayValue('time', 'yearValue', this._year);
+  }
+
+  tick() {
+    this.minute++;
+  }
+
+  startTime() {
+    setInterval(this.tick.bind(this), 250);
   }
 }
+
+

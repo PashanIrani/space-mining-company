@@ -1,10 +1,31 @@
 import { randomIntFromInterval } from "./helpers";
 
-export function UI_displayValue(name: string, valueType: string, value: number, decimals: number = 3) {
+export function UI_displayValue(name: string, valueType: string, value: number, decimals: number = 0, charLength: number = -1) {
+  if (value !== 0 && !value)
+    return;
+
   const element = document.getElementById(`${name}-${valueType}`);
 
+  // Round the value to the specified number of decimal places
+  let roundedValue = value.toFixed(decimals);
+
+  // Split the rounded value into its integer and fractional parts
+  if (charLength > 0) {
+    let [intPart, fracPart] = roundedValue.split(".");
+
+    if (intPart.length < charLength) {
+      intPart = "0".repeat(charLength - intPart.length) + intPart;
+    }
+
+    if (fracPart == undefined) {
+      roundedValue = intPart;
+    } else {
+      roundedValue = intPart + "." + fracPart
+    }
+  }
+
   if (element && value != null)
-    element.innerHTML = value.toFixed(3).toString();
+    element.innerHTML = roundedValue;
 }
 
 export function UI_displayText(name: string, valueType: string, text: string) {

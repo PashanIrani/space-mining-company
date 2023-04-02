@@ -9,6 +9,10 @@
   font-weight: bold;
 }
 
+$light-black: #919b9c;
+$background-color: #3c6ea5;
+$text-color: #000000;
+
 * {
   user-select: none;
 }
@@ -19,15 +23,16 @@
 }
 
 body {
-  background-color: #3c6ea5;
+  background-color: $background-color;
   font-family: "Pixelated MS Sans Serif", Arial;
   -webkit-font-smoothing: antialiased;
   // font-size: ;
+  color: #000000;
 
 }
 
 .header {
-  height: 250px;
+  // height: 250px;
 }
 
 .row {
@@ -54,9 +59,29 @@ body {
   margin: 10px;
 }
 
+progress {
+  -webkit-appearance: none;
+  appearance: none;
+
+  &::-webkit-progress-value,
+  &::-moz-progress-bar {
+    transition: width 0.5s ease-in-out;
+  }
+
+}
 
 .button-container {
   display: flex;
   justify-content: flex-end;
   margin: 10px 10px 0px 0px;
+}
+
+fieldset {
+  &.no-background {
+    background-color: unset;
+  }
+
+  legend.match-text {
+    color: $text-color;
+  }
 }
