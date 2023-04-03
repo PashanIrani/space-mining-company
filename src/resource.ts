@@ -60,7 +60,7 @@ export class Resource {
   private _ratePerSec: number;
   private _holdToGenerateEnabled: boolean;
 
-  private buildQueueCount: number = 0; // count the number of resources that need to be buildt
+  private buildQueue: number[] = []; // keeps track of builds being queued and how much amount to generate, incase generateAmount changes while still in queue
 
   constructor(defination: ResourceDefination) {
     this.name = defination.name;
@@ -208,8 +208,8 @@ export class Resource {
     this._buildStatus = value;
 
     let queueString = '';
-    if (this.buildQueueCount > 1) {
-      queueString = ` +${this.buildQueueCount - 1}`
+    if (this.buildQueue.length > 1) {
+      queueString = ` +${this.buildQueue.length - 1}`
     }
     if (this.buildStatus == 0) {
       UI_displayText(this.name, 'buildStatus', '');
@@ -224,9 +224,10 @@ export class Resource {
 
     Resource_performCostTransaction(this.costs);
 
-    this.buildQueueCount++;
+    this.buildQueue.push(this.generateAmount);
 
-    if (this.buildQueueCount > 1)
+    // if another build is already happening, wait unitl it's finished
+    if (this.buildQueue.length > 1)
       return;
 
     this.initiateBuild();
@@ -246,29 +247,27 @@ export class Resource {
       }, timePerPercent);
 
       setTimeout(() => {
-        this.build();
+        this.build(this.buildQueue.shift());
         clearInterval(percentTickInterval);
         this.buildStatus = 0;
-        this.buildQueueCount--;
         this.checkIfToInitateAnotherBuild();
       }, this.timeToBuildMs);
 
     } else {
-      this.build();
-      this.buildQueueCount--;
+      this.build(this.buildQueue.shift());
       this.checkIfToInitateAnotherBuild();
     }
   }
 
   private checkIfToInitateAnotherBuild() {
-    if (this.buildQueueCount > 0) {
+    if (this.buildQueue.length > 0) {
       this.initiateBuild();
     }
   }
 
   //! Only run after it is fully okay to build after checks with canAffordGeneration() and ONLY after Resource_performCostTransaction()
-  private build() {
-    this.amount += this.generateAmount;
+  private build(amount: number = this.generateAmount) {
+    this.amount += amount;
     this._afterNewGeneration();
   }
 
