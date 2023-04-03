@@ -22,10 +22,6 @@ export class Store {
     if (items) {
       Store.items = items;
     }
-
-    setInterval(() => {
-      UI_drawStore(Store.items);
-    }, 250);
   }
 
 
@@ -48,5 +44,9 @@ export class Store {
     Store.items[key].onPurchase();
     Store.items = { ...Store.items }; // to make setter run
 
+  }
+
+  static reDraw() {
+    UI_drawStore(this.items);
   }
 }

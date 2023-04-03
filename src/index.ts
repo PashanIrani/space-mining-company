@@ -31,6 +31,8 @@ const funds = new Resource({
   timeToBuildMs: DEV ? 10 : 1000,
 });
 
+const ALL_RESOURCES = [energy, funds];
+
 const store = new Store({
   'profit1': {
     displayName: 'Profit Duplication',
@@ -41,8 +43,44 @@ const store = new Store({
     },
     purchased: false,
     dependsOn: null,
+  },
+  'profit2': {
+    displayName: 'Profit Duplication (2)',
+    displayDescription: "Results in a doubling of profits.",
+    costs: [{ resource: funds, amount: 40 }, { resource: energy, amount: 100 }],
+    onPurchase: () => {
+      funds.generateAmount *= 2;
+    },
+    purchased: false,
+    dependsOn: 'profit1',
+  },
+  'profit3': {
+    displayName: 'Profit Duplication (3)',
+    displayDescription: "Results in a doubling of profits.",
+    costs: [{ resource: funds, amount: 80 }, { resource: energy, amount: 200 }],
+    onPurchase: () => {
+      funds.generateAmount *= 2;
+    },
+    purchased: false,
+    dependsOn: 'profit1',
+  },
+  'moreEnergy': {
+    displayName: 'Caffeine pills',
+    displayDescription: "Increases how much energy one can have",
+    costs: [{ resource: funds, amount: 100 }, { resource: energy, amount: 100 }],
+    onPurchase: () => {
+      energy.capacity = 200;
+    },
+    purchased: false,
+    dependsOn: 'profit1',
   }
 });
 
 const pm = new PacingManger({ energy, funds });
-setInterval(pm.check.bind(pm), 1000);
+
+ALL_RESOURCES.forEach(resource => {
+  resource.onAmountUpdate(() => {
+    Store.reDraw();
+    pm.check();
+  })
+})

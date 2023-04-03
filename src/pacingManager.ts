@@ -12,7 +12,7 @@ export class PacingManger {
   }
 
   check() {
-    if (this._resources.energy.amount >= 10) {
+    if (this._resources.energy.amount >= 20) {
       UI_showWindow(this._resources.funds.name);
     }
 

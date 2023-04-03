@@ -34,7 +34,9 @@ export function UI_showWindow(name: string) {
   const element = document.getElementById(`${name}-window`);
 
   if (element) {
-    element.style.display = 'block';
+    element.style.visibility = 'visible';
+    element.style.opacity = '1';
+    element.style.position = 'static';
   }
 }
 
@@ -42,34 +44,61 @@ export function UI_hideWindow(name: string) {
   const element = document.getElementById(`${name}-window`);
 
   if (element) {
-    element.style.display = 'none';
+    element.style.visibility = 'hidden';
+    element.style.opacity = '0';
+    element.style.position = 'absolute';
   }
 }
 
 export function UI_drawStore(storeItems: StoreDefination) {
-  const element = document.getElementById("store-content-container");
+  const container = document.getElementById("store-content-container");
 
-  if (!element) return;
+  if (!container) return;
 
-  element.innerHTML = '';
+  container.innerHTML = '';
 
   for (const key in storeItems) {
-    if (storeItems[key].purchased) continue
+    if (storeItems[key].purchased) continue;
+    if (storeItems[key].dependsOn && !storeItems[storeItems[key].dependsOn]?.purchased) continue; // if dependsOn has not been purchased, skip
 
-    element.innerHTML += `<div class="store-item-container">
-    <div class="store-item-info">
-      <p><b>${storeItems[key].displayName}</b></p>
-      <p>${storeItems[key].displayDescription}</p>
-      <p>Cost: ${Cost_getCostDisplayString(storeItems[key].costs)}</p>
-    </div>
-    <div class="store-item-button-container">
-      <button id="${key}-generate-button" ${!Resource_canAffordGeneration(storeItems[key].costs) ? 'disabled' : ''}>Buy</button>
-    </div>
-    </div>`;
+    const itemContainer = document.createElement('div');
+    itemContainer.classList.add('store-item-container');
 
-    document.getElementById(`${key}-generate-button`).addEventListener('click', () => Store.buyItem(key))
+    const itemInfoContainer = document.createElement('div');
+    itemInfoContainer.classList.add('store-item-info');
+
+    const nameElement = document.createElement('p');
+    nameElement.innerHTML = `<b>${storeItems[key].displayName}</b>`;
+
+    const descriptionElement = document.createElement('p');
+    descriptionElement.textContent = storeItems[key].displayDescription;
+
+    const costElement = document.createElement('p');
+    costElement.innerHTML = `Cost: ${Cost_getCostDisplayString(storeItems[key].costs)}`;
+
+    itemInfoContainer.appendChild(nameElement);
+    itemInfoContainer.appendChild(descriptionElement);
+    itemInfoContainer.appendChild(costElement);
+
+    const buttonContainer = document.createElement('div');
+    buttonContainer.classList.add('store-item-button-container');
+
+    const buttonElement = document.createElement('button');
+    buttonElement.id = `${key}-generate-button`;
+    buttonElement.textContent = 'Buy';
+    buttonElement.disabled = !Resource_canAffordGeneration(storeItems[key].costs);
+
+    buttonElement.addEventListener('click', () => Store.buyItem(key));
+
+    buttonContainer.appendChild(buttonElement);
+
+    itemContainer.appendChild(itemInfoContainer);
+    itemContainer.appendChild(buttonContainer);
+
+    container.appendChild(itemContainer);
   }
 }
+
 
 export function doGlitchEffect() {
   const elements = document.querySelectorAll('*:not(body):not(html)');

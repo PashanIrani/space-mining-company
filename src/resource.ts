@@ -61,15 +61,16 @@ export class Resource {
   private _holdToGenerateEnabled: boolean;
 
   private buildQueue: number[] = []; // keeps track of builds being queued and how much amount to generate, incase generateAmount changes while still in queue
+  private onAmountUpdateCallbacks: Function[] = []; // holds functions that need to be called when amount is updated.
 
   constructor(defination: ResourceDefination) {
     this.name = defination.name;
 
     // not using private here to allow setter to run on init
-    this.amount = defination.amount;
     this.generateAmount = defination.generateAmount;
     this.capacity = defination.capacity;
     this.costs = defination.costs;
+    this.amount = defination.amount;
     this.timeToBuildMs = defination.timeToBuildMs;
     this._holdToGenerateEnabled = defination.holdToGenerateEnabled || false;
 
@@ -78,6 +79,16 @@ export class Resource {
 
     this.assignEventListeners();
     this.initRateCalculation();
+
+    for (let i = 0; i < this.costs.length; i++) {
+      const cost = this.costs[i];
+      cost.resource.onAmountUpdate(() => {
+        UI_displayText(this.name, 'costs', Cost_getCostDisplayString(this.costs));
+      });
+    }
+  }
+  onAmountUpdate(callbackFn: Function) {
+    this.onAmountUpdateCallbacks.push(callbackFn);
   }
 
   private initRateCalculation() {
@@ -145,6 +156,8 @@ export class Resource {
     }
 
     UI_displayValue(this.name, 'amount', this.amount);
+
+    this.onAmountUpdateCallbacks.forEach(fn => fn());
 
     // Update progress bar based on ticks to give smooth animation
     const transitionTimeMs = 100;
