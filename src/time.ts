@@ -36,7 +36,8 @@ export class Time {
     }
 
     this._minute = value;
-    UI_displayValue('time', 'minuteValue', this._minute, 0, 2);
+    // UI_displayValue('time', 'minuteValue', this._minute, 0, 2);
+    UI_displayText('time', 'formattedTime', this.getFormatedTime());
   }
 
   get hour() {
@@ -50,7 +51,9 @@ export class Time {
     }
 
     this._hour = value;
-    UI_displayValue('time', 'hourValue', this._hour, 0, 2);
+    // UI_displayValue('time', 'hourValue', this._hour, 0, 2);
+    UI_displayText('time', 'formattedTime', this.getFormatedTime());
+    UI_displayText('time', 'timeOfDayLabel', this.getLabelOfTime());
   }
 
   get day() {
@@ -63,7 +66,8 @@ export class Time {
       this.month++;
     }
     this._day = value;
-    UI_displayValue('time', 'dayValue', this._day);
+    // UI_displayValue('time', 'dayValue', this._day);
+    UI_displayText('time', 'formattedDate', this.getFormatedDate());
   }
 
   get month() {
@@ -77,7 +81,8 @@ export class Time {
     }
 
     this._month = value;
-    UI_displayValue('time', 'monthValue', this._month);
+    // UI_displayValue('time', 'monthValue', this._month);
+    UI_displayText('time', 'formattedDate', this.getFormatedDate());
   }
 
   get year() {
@@ -86,7 +91,8 @@ export class Time {
 
   set year(value: number) {
     this._year = value;
-    UI_displayValue('time', 'yearValue', this._year);
+    // UI_displayValue('time', 'yearValue', this._year);
+    UI_displayText('time', 'formattedDate', this.getFormatedDate());
   }
 
   tick() {
@@ -96,6 +102,81 @@ export class Time {
   startTime() {
     setInterval(this.tick.bind(this), 250);
   }
+
+  getFormatedTime(): string {
+    let ampm = "AM";
+    let formattedHour = this.hour;
+
+    if (this.hour >= 12) {
+      ampm = "PM";
+      formattedHour = this.hour % 12;
+    }
+
+    if (formattedHour === 0) {
+      formattedHour = 12;
+    }
+
+    const formattedMins = this.minute < 10 ? `0${this.minute}` : this.minute;
+
+    return `${formattedHour}:${formattedMins} ${ampm}`;
+  }
+
+  getFormatedDate(): string {
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ];
+
+    const formattedMonth = months[this.month - 1]; // adjust for zero-based index
+
+    let suffix = "th";
+    if (this.day === 1 || this.day === 21 || this.day === 31) {
+      suffix = "st";
+    } else if (this.day === 2 || this.day === 22) {
+      suffix = "nd";
+    } else if (this.day === 3 || this.day === 23) {
+      suffix = "rd";
+    }
+
+    return `${this.day}${suffix} ${formattedMonth}, ${this.year}`;
+  }
+
+  getLabelOfTime(): string {
+    let hour = this.hour;
+
+    if (hour < 4) {
+      return "Late Night";
+    } else if (hour < 6) {
+      return "Early Morning";
+    } else if (hour < 9) {
+      return "Morning";
+    } else if (hour < 12) {
+      return "Late Morning";
+    } else if (hour < 14) {
+      return "Noon";
+    } else if (hour < 16) {
+      return "Afternoon";
+    } else if (hour < 18) {
+      return "Late Afternoon";
+    } else if (hour < 20) {
+      return "Early Evening";
+    } else if (hour < 22) {
+      return "Evening";
+    } else {
+      return "Late Evening";
+    }
+  }
+
 }
 
 

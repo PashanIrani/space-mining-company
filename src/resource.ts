@@ -30,7 +30,9 @@ export class Resource {
   private _afterNewGeneration: Function;
   private _afterDeduction: Function;
   private _ratePerSec: number;
-  private _holdTogenerateEnabled: boolean;
+  private _holdToGenerateEnabled: boolean;
+
+  private buildQueueCount: number = 0; // count the number of resources that need to be buildt
 
   constructor(defination: ResourceDefination) {
     this.name = defination.name;
@@ -41,7 +43,7 @@ export class Resource {
     this.capacity = defination.capacity;
     this.costs = defination.costs;
     this.timeToBuildMs = defination.timeToBuildMs;
-    this._holdTogenerateEnabled = defination.holdToGenerateEnabled || false;
+    this._holdToGenerateEnabled = defination.holdToGenerateEnabled || false;
 
     this._afterNewGeneration = defination.afterNewGeneration ? defination.afterNewGeneration : () => { };
     this._afterDeduction = defination.afterDeduction ? defination.afterDeduction : () => { };
@@ -83,7 +85,7 @@ export class Resource {
 
       let intervalId: NodeJS.Timeout;
 
-      if (this._holdTogenerateEnabled) {
+      if (this._holdToGenerateEnabled) {
         generateButton.addEventListener('mousedown', () => {
           intervalId = setInterval(() => {
             generateButton.click();
@@ -174,11 +176,24 @@ export class Resource {
   }
 
   // Generates the resource, returns true or false based on if it was a success.
-  generate(): boolean {
+  public generate(): boolean {
     if (!this.canAffordGeneration()) return false;
 
     this.performCostTransaction();
 
+    this.buildQueueCount++;
+
+    if (this.buildQueueCount > 1)
+      return;
+
+    this.initiateBuild();
+
+
+
+    return true;
+  }
+
+  private initiateBuild() {
     if (this.timeToBuildMs > 0) {
       const timePerPercent = this.timeToBuildMs / 100; // the frequency of build percentage update
 
@@ -191,17 +206,25 @@ export class Resource {
         this.build();
         clearInterval(percentTickInterval);
         this.buildStatus = 0;
+        this.buildQueueCount--;
+        this.checkIfToInitateAnotherBuild();
       }, this.timeToBuildMs);
 
     } else {
       this.build();
+      this.buildQueueCount--;
+      this.checkIfToInitateAnotherBuild();
     }
+  }
 
-    return true;
+  private checkIfToInitateAnotherBuild() {
+    if (this.buildQueueCount > 0) {
+      this.initiateBuild();
+    }
   }
 
   //! Only run after it is fully okay to build after checks with canAffordGeneration() and ONLY after performCostTransaction()
-  build() {
+  private build() {
     this.amount += this.generateAmount;
     this._afterNewGeneration();
   }

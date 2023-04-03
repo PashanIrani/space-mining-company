@@ -10,7 +10,6 @@ const currentYear = currentDate.getFullYear();
 const currentMonth = currentDate.getMonth() + 1; // getMonth() returns 0-based index, so add 1
 const currentDay = currentDate.getDate();
 
-
 const time = new Time(0, 0, currentDay, currentMonth, currentYear);
 
 const energy = new Resource({
@@ -27,7 +26,7 @@ const funds = new Resource({
   amount: 0,
   generateAmount: 1,
   costs: [{ resource: energy, amount: 1 }],
-  timeToBuildMs: 2000,
+  timeToBuildMs: 500,
 });
 
 
