@@ -17,6 +17,15 @@ $text-color: #000000;
   user-select: none;
 }
 
+/* Disable double-tap zooming in mobile browsers */
+@media (max-width: 768px) {
+
+  /* Target mobile devices with a maximum width of 768px */
+  html {
+    touch-action: manipulation;
+  }
+}
+
 .glitch-fx {
   opacity: 0.65 !important;
   transition: all 0.2s;
