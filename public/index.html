@@ -38,7 +38,7 @@
       </div>
       <div class="window-body">
         <p>Welcome to Space Mining Co.!</p>
-        <fieldset class="no-background">
+        <fieldset class="no-background basic-border">
           <legend class="match-text">General Info:</legend>
           <p>Date: <span id="time-formattedDate"></span></p>
           <p>Time: <span id="time-formattedTime"></span> (<span id="time-timeOfDayLabel"></span>)</p>
@@ -102,7 +102,25 @@
         <p class="status-bar-field">Rate: <span id="funds-rate"></span></p>
       </div>
     </div>
-    <script src="/scripts/index.js"></script>
+  </div>
+
+  <div class="row">
+    <div id="store-window" class="window">
+      <div class="title-bar">
+        <div class="title-bar-text">Store</div>
+        <div class="title-bar-controls">
+          <button aria-label="Minimize"></button>
+          <button aria-label="Maximize"></button>
+          <button aria-label="Close"></button>
+        </div>
+      </div>
+      <div class="window-body">
+        <div id="store-content-container"></div>
+      </div>
+
+    </div>
+  </div>
+  <script src="/scripts/index.js"></script>
 </body>
 
 </html>

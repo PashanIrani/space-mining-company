@@ -1,4 +1,7 @@
+import { Cost_getCostDisplayString } from "./cost";
 import { formatNumberString, randomIntFromInterval } from "./helpers";
+import { Resource_canAffordGeneration } from "./resource";
+import { Store, StoreDefination } from "./store";
 
 export function UI_displayValue(name: string, valueType: string, value: number, decimals: number = 0, charLength: number = -1) {
   if (value !== 0 && !value)
@@ -39,9 +42,32 @@ export function UI_hideWindow(name: string) {
   const element = document.getElementById(`${name}-window`);
 
   if (element) {
-    console.log(element.style);
-
     element.style.display = 'none';
+  }
+}
+
+export function UI_drawStore(storeItems: StoreDefination) {
+  const element = document.getElementById("store-content-container");
+
+  if (!element) return;
+
+  element.innerHTML = '';
+
+  for (const key in storeItems) {
+    if (storeItems[key].purchased) continue
+
+    element.innerHTML += `<div class="store-item-container">
+    <div class="store-item-info">
+      <p><b>${storeItems[key].displayName}</b></p>
+      <p>${storeItems[key].displayDescription}</p>
+      <p>Cost: ${Cost_getCostDisplayString(storeItems[key].costs)}</p>
+    </div>
+    <div class="store-item-button-container">
+      <button id="${key}-generate-button" ${!Resource_canAffordGeneration(storeItems[key].costs) ? 'disabled' : ''}>Buy</button>
+    </div>
+    </div>`;
+
+    document.getElementById(`${key}-generate-button`).addEventListener('click', () => Store.buyItem(key))
   }
 }
 

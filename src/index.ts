@@ -3,7 +3,8 @@ import { Time } from './time'
 import { doGlitchEffect } from "./ui"
 import './styles/index.scss';
 import { PacingManger } from "./pacingManager";
-const DEV = true;
+import { Store } from "./store";
+const DEV = false;
 
 const currentDate = new Date();
 
@@ -25,12 +26,23 @@ const energy = new Resource({
 const funds = new Resource({
   name: 'funds',
   amount: 0,
-  generateAmount: 1,
+  generateAmount: DEV ? 1000 : 1,
   costs: [{ resource: energy, amount: 10 }],
-  timeToBuildMs: 1000,
+  timeToBuildMs: DEV ? 10 : 1000,
 });
 
-
+const store = new Store({
+  'profit1': {
+    displayName: 'Profit Duplication',
+    displayDescription: "Results in a doubling of profits.",
+    costs: [{ resource: funds, amount: 20 }, { resource: energy, amount: 100 }],
+    onPurchase: () => {
+      funds.generateAmount *= 2;
+    },
+    purchased: false,
+    dependsOn: null,
+  }
+});
 
 const pm = new PacingManger({ energy, funds });
 setInterval(pm.check.bind(pm), 1000);

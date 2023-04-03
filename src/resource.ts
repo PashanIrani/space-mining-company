@@ -1,5 +1,5 @@
 import { UI_displayValue, UI_displayText, UI_updateProgressBar } from "./ui";
-import { Cost } from "./cost";
+import { Cost, Cost_getCostDisplayString } from "./cost";
 import { formatNumberString } from "./helpers";
 
 
@@ -18,6 +18,33 @@ export interface ResourceDefination {
 export interface GroupResouceDefination {
   name: string,
   groupResources: Resource[]
+}
+// checks if all the costs are met
+export function Resource_canAffordGeneration(costs: Cost[]): boolean {
+  for (let i = 0; i < costs.length; i++) {
+    const cost = costs[i];
+
+    if (cost.resource.amount < cost.amount) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+// TODO: add locks to everything using these resource to fully perform transaction
+export function Resource_performCostTransaction(costs: Cost[]): boolean {
+  for (let i = 0; i < costs.length; i++) {
+    const cost = costs[i];
+
+    if (cost.resource.amount < cost.amount) {
+      return false;
+    }
+
+    cost.resource.performDeduction(cost.amount);
+  }
+
+  return true;
 }
 
 export class Resource {
@@ -124,7 +151,6 @@ export class Resource {
     const timePerTransitionTick = 10;
     const totalTicks = transitionTimeMs / timePerTransitionTick;
     const amountPerTick = (this._amount - prevAmount) / totalTicks;
-    console.log(transitionTimeMs, timePerTransitionTick, totalTicks, amountPerTick);
 
     let tickCount = 0;
     let progressBarUpdateInterval = setInterval(() => {
@@ -155,16 +181,7 @@ export class Resource {
 
   set costs(value: Cost[]) {
     this._costs = value;
-
-    let costDisplayText = "";
-    for (let i = 0; i < this.costs.length; i++) {
-      const cost = this.costs[i];
-      costDisplayText += `${cost.resource.name.charAt(0).toUpperCase() + cost.resource.name.slice(1).toLowerCase()} (${cost.amount})`
-      if (i < this.costs.length - 1) {
-        costDisplayText += ", ";
-      }
-    }
-    UI_displayText(this.name, 'costs', costDisplayText);
+    UI_displayText(this.name, 'costs', Cost_getCostDisplayString(this.costs));
   }
 
   get generateAmount(): number {
@@ -203,9 +220,9 @@ export class Resource {
 
   // Generates the resource, returns true or false based on if it was a success.
   public generate(): boolean {
-    if (!this.canAffordGeneration()) return false;
+    if (!Resource_canAffordGeneration(this.costs)) return false;
 
-    this.performCostTransaction();
+    Resource_performCostTransaction(this.costs);
 
     this.buildQueueCount++;
 
@@ -249,38 +266,10 @@ export class Resource {
     }
   }
 
-  //! Only run after it is fully okay to build after checks with canAffordGeneration() and ONLY after performCostTransaction()
+  //! Only run after it is fully okay to build after checks with canAffordGeneration() and ONLY after Resource_performCostTransaction()
   private build() {
     this.amount += this.generateAmount;
     this._afterNewGeneration();
-  }
-
-  // checks if all the costs are met
-  canAffordGeneration(): boolean {
-    for (let i = 0; i < this.costs.length; i++) {
-      const cost = this.costs[i];
-
-      if (cost.resource.amount < cost.amount) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  // TODO: add locks to everything using these resource to fully perform transaction
-  performCostTransaction(): boolean {
-    for (let i = 0; i < this.costs.length; i++) {
-      const cost = this.costs[i];
-
-      if (cost.resource.amount < cost.amount) {
-        return false;
-      }
-
-      cost.resource.performDeduction(cost.amount);
-    }
-
-    return true;
   }
 
   performDeduction(amountToDeduct: number) {
