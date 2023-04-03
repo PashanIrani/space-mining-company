@@ -3,6 +3,7 @@ import { Time } from './time'
 import { doGlitchEffect } from "./ui"
 import './styles/index.scss';
 import { PacingManger } from "./pacingManager";
+const DEV = true;
 
 const currentDate = new Date();
 
@@ -15,7 +16,7 @@ const time = new Time(0, 0, currentDay, currentMonth, currentYear);
 const energy = new Resource({
   name: 'energy',
   amount: 0,
-  generateAmount: 10,
+  generateAmount: 5,
   capacity: 100,
   costs: [],
   timeToBuildMs: 0,
@@ -25,8 +26,8 @@ const funds = new Resource({
   name: 'funds',
   amount: 0,
   generateAmount: 1,
-  costs: [{ resource: energy, amount: 1 }],
-  timeToBuildMs: 500,
+  costs: [{ resource: energy, amount: 10 }],
+  timeToBuildMs: 1000,
 });
 
 

@@ -1,5 +1,6 @@
 import { UI_displayValue, UI_displayText, UI_updateProgressBar } from "./ui";
 import { Cost } from "./cost";
+import { formatNumberString } from "./helpers";
 
 
 export interface ResourceDefination {
@@ -108,6 +109,8 @@ export class Resource {
   }
 
   set amount(value: number) {
+    const prevAmount = this._amount;
+
     if (value > this.capacity) {
       this._amount = this.capacity;
     } else {
@@ -115,7 +118,25 @@ export class Resource {
     }
 
     UI_displayValue(this.name, 'amount', this.amount);
-    UI_updateProgressBar(this.name, this.amount, this.capacity);
+
+    // Update progress bar based on ticks to give smooth animation
+    const transitionTimeMs = 100;
+    const timePerTransitionTick = 10;
+    const totalTicks = transitionTimeMs / timePerTransitionTick;
+    const amountPerTick = (this._amount - prevAmount) / totalTicks;
+    console.log(transitionTimeMs, timePerTransitionTick, totalTicks, amountPerTick);
+
+    let tickCount = 0;
+    let progressBarUpdateInterval = setInterval(() => {
+
+      UI_updateProgressBar(this.name, prevAmount + (amountPerTick * tickCount), this.capacity);
+
+      if (++tickCount == totalTicks) {
+        UI_updateProgressBar(this.name, this.amount, this.capacity);
+        clearInterval(progressBarUpdateInterval);
+      }
+    }, timePerTransitionTick);
+
   }
 
   get capacity(): number {
@@ -168,10 +189,15 @@ export class Resource {
 
   set buildStatus(value: number) {
     this._buildStatus = value;
+
+    let queueString = '';
+    if (this.buildQueueCount > 1) {
+      queueString = ` +${this.buildQueueCount - 1}`
+    }
     if (this.buildStatus == 0) {
       UI_displayText(this.name, 'buildStatus', '');
     } else {
-      UI_displayText(this.name, 'buildStatus', `${Math.round(this.buildStatus * 100)}%`);
+      UI_displayText(this.name, 'buildStatus', `[${formatNumberString(Math.round(this.buildStatus * 100), 0, -1)}%${queueString}]`);
     }
   }
 

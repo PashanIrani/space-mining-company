@@ -1,4 +1,4 @@
-import { randomIntFromInterval } from "./helpers";
+import { formatNumberString, randomIntFromInterval } from "./helpers";
 
 export function UI_displayValue(name: string, valueType: string, value: number, decimals: number = 0, charLength: number = -1) {
   if (value !== 0 && !value)
@@ -6,26 +6,10 @@ export function UI_displayValue(name: string, valueType: string, value: number, 
 
   const element = document.getElementById(`${name}-${valueType}`);
 
-  // Round the value to the specified number of decimal places
-  let roundedValue = value.toFixed(decimals);
 
-  // Split the rounded value into its integer and fractional parts
-  if (charLength > 0) {
-    let [intPart, fracPart] = roundedValue.split(".");
-
-    if (intPart.length < charLength) {
-      intPart = "0".repeat(charLength - intPart.length) + intPart;
-    }
-
-    if (fracPart == undefined) {
-      roundedValue = intPart;
-    } else {
-      roundedValue = intPart + "." + fracPart
-    }
-  }
 
   if (element && value != null)
-    element.innerHTML = roundedValue;
+    element.innerHTML = formatNumberString(value, decimals, charLength);
 }
 
 export function UI_displayText(name: string, valueType: string, text: string) {
