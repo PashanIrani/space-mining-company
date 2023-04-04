@@ -42,7 +42,7 @@ export class Store {
 
     Resource_performCostTransaction(Store.items[key].costs);
     Store.items[key].purchased = true;
-    Store.items[key].onPurchase(Store.items[key]);
+    Store.items[key].onPurchase(Store.items[key]); // passing self to on purchase to allow that method to access anything it may need
     Store.items = { ...Store.items }; // to make setter run
 
   }
