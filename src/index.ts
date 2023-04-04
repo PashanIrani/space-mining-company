@@ -4,20 +4,27 @@ import { doGlitchEffect } from "./ui"
 import './styles/index.scss';
 import { PacingManger } from "./pacingManager";
 import { Store, StoreDefination, StoreItem } from "./store";
+import { SaveSystem } from "./saveSystem";
 const DEV = true;
 
-const currentDate = new Date();
+const savedTimeData = SaveSystem.loadTime();
+let time: Time;
 
-const currentYear = currentDate.getFullYear();
-const currentMonth = currentDate.getMonth() + 1; // getMonth() returns 0-based index, so add 1
-const currentDay = currentDate.getDate();
+if (savedTimeData) {
+  time = new Time(savedTimeData.minute, savedTimeData.hour, savedTimeData.day, savedTimeData.month, savedTimeData.year);
+} else {
+  const currentDate = new Date();
 
-const time = new Time(0, 0, currentDay, currentMonth, currentYear);
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth() + 1; // getMonth() returns 0-based index, so add 1
+  const currentDay = currentDate.getDate();
+  time = new Time(0, 0, currentDay, currentMonth, currentYear);
+}
 
 const energy = new Resource({
   name: 'energy',
   amount: 0,
-  generateAmount: DEV ? 100 : 1,
+  generateAmount: 1,
   capacity: 100,
   costs: [],
   timeToBuildMs: 0,
@@ -28,12 +35,12 @@ const funds = new Resource({
   name: 'funds',
   amount: 0,
   generateAmount: 1,
-  capacity: 10,
+  capacity: 1000,
   costs: [{ resource: energy, amount: 10 }],
   timeToBuildMs: 1000,
 });
 
-const ALL_RESOURCES = [energy, funds];
+const ALL_RESOURCES: { [key: string]: Resource } = { energy, funds };
 
 const store = new Store({
   'profit1': {
@@ -102,11 +109,26 @@ const store = new Store({
   },
 });
 
-const pm = new PacingManger({ energy, funds });
+SaveSystem.loadResources(ALL_RESOURCES);
 
-ALL_RESOURCES.forEach(resource => {
+const pm = new PacingManger(ALL_RESOURCES);
+
+SaveSystem.loadStoreItems();
+Store.reDraw();
+pm.check();
+
+// add callbacks to each resource
+for (const key in ALL_RESOURCES) {
+  let resource = ALL_RESOURCES[key];
   resource.onAmountUpdate(() => {
     Store.reDraw();
     pm.check();
   })
-})
+}
+
+// Save game every 1s
+setInterval(() => {
+  SaveSystem.saveResources(ALL_RESOURCES);
+  SaveSystem.saveTime(time);
+  SaveSystem.saveStoreItems();
+}, 1000);

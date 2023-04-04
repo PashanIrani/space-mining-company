@@ -3,21 +3,41 @@ import { UI_hideWindow, UI_showWindow } from "./ui";
 
 export class PacingManger {
   private _resources: any;
+  public introducedWindows: string[]; // holds names of each window that has been introduced to the player
 
   constructor(resources: any) {
     this._resources = resources;
+    let alreadyIntroducedWindows = localStorage.getItem('pacing');
+    if (alreadyIntroducedWindows == null) {
+      this.introducedWindows = [];
+    } else {
+      this.introducedWindows = JSON.parse(alreadyIntroducedWindows);
+    }
 
-    UI_hideWindow(this._resources.funds.name);
-    UI_hideWindow('store');
+    let hideWindows = [this._resources.funds.name, 'store'];
+
+    for (let i = 0; i < hideWindows.length; i++) {
+      if (this.introducedWindows.includes(hideWindows[i])) continue;
+      UI_hideWindow(hideWindows[i]);
+    }
+
   }
 
   check() {
     if (this._resources.energy.amount >= 10) {
-      UI_showWindow(this._resources.funds.name);
+      this.showWindow(this._resources.funds.name);
     }
 
     if (this._resources.funds.amount >= 5) {
-      UI_showWindow('store');
+      this.showWindow('store');
     }
+  }
+
+  showWindow(name: string) {
+    if (this.introducedWindows.includes(name)) return;
+
+    UI_showWindow(name);
+    this.introducedWindows.push(name);
+    localStorage.setItem('pacing', JSON.stringify(this.introducedWindows));
   }
 }

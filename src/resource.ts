@@ -54,13 +54,15 @@ export class Resource {
   private _capacity: number;
   private _costs: Cost[];
   private _timeToBuildMs: number;
-  private _buildStatus: number; // range from 0 to 1 indicating percentage
+  private _buildStatus: number = 0; // range from 0 to 1 indicating percentage of the current build
   private _afterNewGeneration: Function;
   private _afterDeduction: Function;
   private _ratePerSec: number;
   private _holdToGenerateAmount: number;
 
-  private buildQueue: number[] = []; // keeps track of builds being queued and how much amount to generate, incase generateAmount changes while still in queue
+  private _updatedFromSave: boolean = false; // set this to true after loading values from a save. To trigger in-progress builds to finish
+
+  public buildQueue: number[] = []; // keeps track of builds being queued and how much amount to generate, incase generateAmount changes while still in queue
   private onAmountUpdateCallbacks: Function[] = []; // holds functions that need to be called when amount is updated.
 
   private holdIntervalId: NodeJS.Timeout; // points to interval created for mouse hold behaviour
@@ -79,6 +81,7 @@ export class Resource {
     this._afterNewGeneration = defination.afterNewGeneration ? defination.afterNewGeneration : () => { };
     this._afterDeduction = defination.afterDeduction ? defination.afterDeduction : () => { };
 
+    this.assignEventListeners();
     this.initRateCalculation();
 
     // when a cost's amount is updated, update string for this resource by give each cost resource a callback
@@ -120,6 +123,8 @@ export class Resource {
 
   // If generate button is held down, this method will generate clicks _holdToGenerateAmount time per sec
   private mouseHoldStart() {
+    if (this.holdToGenerateAmount === 0) return;
+
     const generateButton = document.getElementById(`${this.name}-generate-button`);
 
     if (generateButton) {
@@ -130,6 +135,7 @@ export class Resource {
   }
 
   private mouseHoldEnd() {
+    if (this.holdToGenerateAmount === 0) return;
     clearInterval(this.holdIntervalId);
   }
 
@@ -139,25 +145,9 @@ export class Resource {
     if (generateButton) {
       generateButton.addEventListener('click', this.generate.bind(this));
 
-      if (this._holdToGenerateAmount > 0) {
-        generateButton.addEventListener('mousedown', this.mouseHoldStart.bind(this));
-        generateButton.addEventListener('mouseup', this.mouseHoldEnd.bind(this));
-        generateButton.addEventListener('mouseleave', this.mouseHoldEnd.bind(this));
-      }
-    }
-  }
-
-  private unassignEventListeners() {
-    const generateButton = document.getElementById(`${this.name}-generate-button`);
-
-    if (generateButton) {
-      generateButton.removeEventListener('click', this.generate.bind(this));
-
-      if (this._holdToGenerateAmount > 0) {
-        generateButton.removeEventListener('mousedown', this.mouseHoldStart.bind(this));
-        generateButton.removeEventListener('mouseup', this.mouseHoldEnd.bind(this));
-        generateButton.removeEventListener('mouseleave', this.mouseHoldEnd.bind(this));
-      }
+      generateButton.addEventListener('mousedown', this.mouseHoldStart.bind(this));
+      generateButton.addEventListener('mouseup', this.mouseHoldEnd.bind(this));
+      generateButton.addEventListener('mouseleave', this.mouseHoldEnd.bind(this));
     }
   }
 
@@ -205,8 +195,6 @@ export class Resource {
     this._holdToGenerateAmount = value;
 
     // reset event listeners
-    this.unassignEventListeners();
-    this.assignEventListeners();
 
     UI_displayText(this.name, 'hold-amount', value > 0 ? `Hold for +${value} clicks/sec` : '')
   }
@@ -266,6 +254,21 @@ export class Resource {
     return true;
   }
 
+  get updatedFromSave(): boolean {
+    return this._updatedFromSave;
+  }
+
+  //! will only be called once, which will be set if resource's data was loaded from a save. This is to ensure any inprogress builds will continue again
+  set updatedFromSave(value: boolean) {
+    this._updatedFromSave = value;
+
+    if (value) {
+      if (this.buildStatus > 0) {
+        this.initiateBuild();
+      }
+    }
+  }
+
   private getSumOfBuildQueue() {
     let sum = 0;
     for (let i = 0; i < this.buildQueue.length; i++) {
@@ -278,7 +281,6 @@ export class Resource {
     if (this.timeToBuildMs > 0) {
       const timePerPercent = this.timeToBuildMs / 100; // the frequency of build percentage update
 
-      this.buildStatus = 0;
       const percentTickInterval = setInterval(() => {
         this.buildStatus += 0.01;
       }, timePerPercent);
@@ -288,7 +290,7 @@ export class Resource {
         clearInterval(percentTickInterval);
         this.buildStatus = 0;
         this.checkIfToInitateAnotherBuild();
-      }, this.timeToBuildMs);
+      }, this.timeToBuildMs * (1 - this.buildStatus));
 
     } else {
       this.build(this.buildQueue.shift());
