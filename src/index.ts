@@ -21,6 +21,7 @@ const energy = new Resource({
   capacity: 100,
   costs: [],
   timeToBuildMs: 0,
+  holdToGenerateAmount: 0
 });
 
 const funds = new Resource({
@@ -44,36 +45,16 @@ const store = new Store({
     purchased: false,
     dependsOn: null,
   },
-  'profit2': {
-    displayName: 'Profit Duplication (2)',
+  'enableEnergyHoldGeneration': {
+    displayName: 'Profit Duplicdasasdasation',
     displayDescription: "Results in a doubling of profits.",
-    costs: [{ resource: funds, amount: 40 }, { resource: energy, amount: 100 }],
+    costs: [{ resource: funds, amount: 20 }, { resource: energy, amount: 100 }],
     onPurchase: () => {
-      funds.generateAmount *= 2;
+      energy.holdToGenerateAmount = 4;
     },
     purchased: false,
-    dependsOn: 'profit1',
+    dependsOn: null,
   },
-  'profit3': {
-    displayName: 'Profit Duplication (3)',
-    displayDescription: "Results in a doubling of profits.",
-    costs: [{ resource: funds, amount: 80 }, { resource: energy, amount: 200 }],
-    onPurchase: () => {
-      funds.generateAmount *= 2;
-    },
-    purchased: false,
-    dependsOn: 'profit1',
-  },
-  'moreEnergy': {
-    displayName: 'Caffeine pills',
-    displayDescription: "Increases how much energy one can have",
-    costs: [{ resource: funds, amount: 100 }, { resource: energy, amount: 100 }],
-    onPurchase: () => {
-      energy.capacity = 200;
-    },
-    purchased: false,
-    dependsOn: 'profit1',
-  }
 });
 
 const pm = new PacingManger({ energy, funds });

@@ -12,7 +12,7 @@ export interface ResourceDefination {
   timeToBuildMs: number; // This is how long it would take to build this resource
   afterNewGeneration?: Function; // Function that runs after a new generation is complete
   afterDeduction?: Function; // Function that runs after this resource is deducted for a transaction
-  holdToGenerateEnabled?: boolean;
+  holdToGenerateAmount?: number;
 }
 
 export interface GroupResouceDefination {
@@ -58,10 +58,12 @@ export class Resource {
   private _afterNewGeneration: Function;
   private _afterDeduction: Function;
   private _ratePerSec: number;
-  private _holdToGenerateEnabled: boolean;
+  private _holdToGenerateAmount: number;
 
   private buildQueue: number[] = []; // keeps track of builds being queued and how much amount to generate, incase generateAmount changes while still in queue
   private onAmountUpdateCallbacks: Function[] = []; // holds functions that need to be called when amount is updated.
+
+  private holdIntervalId: NodeJS.Timeout; // points to interval created for mouse hold behaviour
 
   constructor(defination: ResourceDefination) {
     this.name = defination.name;
@@ -72,7 +74,7 @@ export class Resource {
     this.costs = defination.costs;
     this.amount = defination.amount;
     this.timeToBuildMs = defination.timeToBuildMs;
-    this._holdToGenerateEnabled = defination.holdToGenerateEnabled || false;
+    this.holdToGenerateAmount = defination.holdToGenerateAmount || 0;
 
     this._afterNewGeneration = defination.afterNewGeneration ? defination.afterNewGeneration : () => { };
     this._afterDeduction = defination.afterDeduction ? defination.afterDeduction : () => { };
@@ -116,28 +118,45 @@ export class Resource {
     return currentValue - prevValue;
   }
 
+  // If generate button is held down, this method will generate clicks _holdToGenerateAmount time per sec
+  private mouseHoldStart() {
+    const generateButton = document.getElementById(`${this.name}-generate-button`);
+
+    if (generateButton) {
+      this.holdIntervalId = setInterval(() => {
+        generateButton.click();
+      }, 1000 / this._holdToGenerateAmount);
+    }
+  }
+
+  private mouseHoldEnd() {
+    clearInterval(this.holdIntervalId);
+  }
+
   private assignEventListeners() {
     const generateButton = document.getElementById(`${this.name}-generate-button`);
 
     if (generateButton) {
-      generateButton.addEventListener('click', this.generate.bind(this))
+      generateButton.addEventListener('click', this.generate.bind(this));
 
-      let intervalId: NodeJS.Timeout;
+      if (this._holdToGenerateAmount > 0) {
+        generateButton.addEventListener('mousedown', this.mouseHoldStart.bind(this));
+        generateButton.addEventListener('mouseup', this.mouseHoldEnd.bind(this));
+        generateButton.addEventListener('mouseleave', this.mouseHoldEnd.bind(this));
+      }
+    }
+  }
 
-      if (this._holdToGenerateEnabled) {
-        generateButton.addEventListener('mousedown', () => {
-          intervalId = setInterval(() => {
-            generateButton.click();
-          }, 250);
-        });
+  private unassignEventListeners() {
+    const generateButton = document.getElementById(`${this.name}-generate-button`);
 
-        generateButton.addEventListener('mouseup', () => {
-          clearInterval(intervalId);
-        });
+    if (generateButton) {
+      generateButton.removeEventListener('click', this.generate.bind(this));
 
-        generateButton.addEventListener('mouseleave', () => {
-          clearInterval(intervalId);
-        });
+      if (this._holdToGenerateAmount > 0) {
+        generateButton.removeEventListener('mousedown', this.mouseHoldStart.bind(this));
+        generateButton.removeEventListener('mouseup', this.mouseHoldEnd.bind(this));
+        generateButton.removeEventListener('mouseleave', this.mouseHoldEnd.bind(this));
       }
     }
   }
@@ -195,6 +214,20 @@ export class Resource {
   set costs(value: Cost[]) {
     this._costs = value;
     UI_displayText(this.name, 'costs', Cost_getCostDisplayString(this.costs));
+  }
+
+  get holdToGenerateAmount(): number {
+    return this._holdToGenerateAmount;
+  }
+
+  set holdToGenerateAmount(value: number) {
+    this._holdToGenerateAmount = value;
+
+    // reset event listeners
+    this.unassignEventListeners();
+    this.assignEventListeners();
+
+    UI_displayText(this.name, 'hold-amount', value > 0 ? `Hold for +${value} clicks/sec` : '')
   }
 
   get generateAmount(): number {
