@@ -68,7 +68,7 @@
 
         <div class="button-container">
           <div>
-            <button id="energy-generate-button">Generate Energy</button>
+            <button id="energy-generate-button">Generate Energy (<span id="energy-generate-amount"></span>)</button>
             <p class="hold-button-text" id="energy-hold-amount"></p>
           </div>
         </div>
@@ -93,11 +93,15 @@
       </div>
       <div class="window-body">
         <p>Funds, the vital force driving the wheels of the economy, without which all commerce grinds to a halt.</p>
-        <p>Funds: <span id="funds-amount"></span> <span id="funds-buildStatus"></span>
+        <p>Funds: <span id="funds-amount"></span>/
+          <span id="funds-capacity"></span> <span id="funds-buildStatus"></span>
         </p>
         <p>Cost: <span id="funds-costs"></span></p>
         <div class="button-container">
-          <button id="funds-generate-button">Generate Funds</button>
+          <div>
+            <button id="funds-generate-button">Generate Funds (<span id="funds-generate-amount"></span>)</button>
+            <p class="hold-button-text" id="funds-hold-amount"></p>
+          </div>
         </div>
 
       </div>
