@@ -79,9 +79,9 @@ export class Resource {
     this._afterNewGeneration = defination.afterNewGeneration ? defination.afterNewGeneration : () => { };
     this._afterDeduction = defination.afterDeduction ? defination.afterDeduction : () => { };
 
-    this.assignEventListeners();
     this.initRateCalculation();
 
+    // when a cost's amount is updated, update string for this resource by give each cost resource a callback
     for (let i = 0; i < this.costs.length; i++) {
       const cost = this.costs[i];
       cost.resource.onAmountUpdate(() => {
@@ -166,35 +166,16 @@ export class Resource {
   }
 
   set amount(value: number) {
-    const prevAmount = this._amount;
-
     if (value > this.capacity) {
       this._amount = this.capacity;
     } else {
       this._amount = value;
     }
 
-    UI_displayValue(this.name, 'amount', this.amount);
-
     this.onAmountUpdateCallbacks.forEach(fn => fn());
 
-    // Update progress bar based on ticks to give smooth animation
-    const transitionTimeMs = 100;
-    const timePerTransitionTick = 10;
-    const totalTicks = transitionTimeMs / timePerTransitionTick;
-    const amountPerTick = (this._amount - prevAmount) / totalTicks;
-
-    let tickCount = 0;
-    let progressBarUpdateInterval = setInterval(() => {
-
-      UI_updateProgressBar(this.name, prevAmount + (amountPerTick * tickCount), this.capacity);
-
-      if (++tickCount == totalTicks) {
-        UI_updateProgressBar(this.name, this.amount, this.capacity);
-        clearInterval(progressBarUpdateInterval);
-      }
-    }, timePerTransitionTick);
-
+    UI_updateProgressBar(this.name, this.amount, this.capacity);
+    UI_displayValue(this.name, 'amount', this.amount);
   }
 
   get capacity(): number {
@@ -236,6 +217,7 @@ export class Resource {
 
   set generateAmount(value: number) {
     this._generateAmount = value;
+    UI_displayValue(this.name, 'generate-amount', value)
   }
 
   get timeToBuildMs(): number {
@@ -267,6 +249,7 @@ export class Resource {
   // Generates the resource, returns true or false based on if it was a success.
   public generate(): boolean {
     if (!Resource_canAffordGeneration(this.costs)) return false;
+    if (this.amount == this.capacity || this.getSumOfBuildQueue() == (this.capacity - this.amount)) return false; // check capacity is full
 
     Resource_performCostTransaction(this.costs);
 
@@ -283,6 +266,14 @@ export class Resource {
     return true;
   }
 
+  private getSumOfBuildQueue() {
+    let sum = 0;
+    for (let i = 0; i < this.buildQueue.length; i++) {
+      sum += this.buildQueue[i];
+
+    }
+    return sum
+  }
   private initiateBuild() {
     if (this.timeToBuildMs > 0) {
       const timePerPercent = this.timeToBuildMs / 100; // the frequency of build percentage update
