@@ -5,9 +5,10 @@ export class PacingManger {
   private _resources: any;
   public introducedWindows: string[]; // holds names of each window that has been introduced to the player
 
-  constructor(resources: any) {
+  constructor(resources: any, saveEnabled: boolean) {
     this._resources = resources;
-    let alreadyIntroducedWindows = localStorage.getItem('pacing');
+    let alreadyIntroducedWindows = saveEnabled ? localStorage.getItem('pacing') : null;
+
     if (alreadyIntroducedWindows == null) {
       this.introducedWindows = [];
     } else {

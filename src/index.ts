@@ -5,6 +5,7 @@ import './styles/index.scss';
 import { PacingManger } from "./pacingManager";
 import { Store, StoreDefination, StoreItem } from "./store";
 import { SaveSystem } from "./saveSystem";
+
 const DEV = true;
 const SAVE_ENABLED = false;
 
@@ -111,7 +112,7 @@ const store = new Store({
 });
 
 
-const pm = new PacingManger(ALL_RESOURCES);
+const pm = new PacingManger(ALL_RESOURCES, SAVE_ENABLED);
 
 if (SAVE_ENABLED) {
   SaveSystem.loadResources(ALL_RESOURCES);
