@@ -6,8 +6,9 @@ import { PacingManger } from "./pacingManager";
 import { Store, StoreDefination, StoreItem } from "./store";
 import { SaveSystem } from "./saveSystem";
 const DEV = true;
+const SAVE_ENABLED = false;
 
-const savedTimeData = SaveSystem.loadTime();
+const savedTimeData = SAVE_ENABLED ? SaveSystem.loadTime() : null;
 let time: Time;
 
 if (savedTimeData) {
@@ -109,11 +110,14 @@ const store = new Store({
   },
 });
 
-SaveSystem.loadResources(ALL_RESOURCES);
 
 const pm = new PacingManger(ALL_RESOURCES);
 
-SaveSystem.loadStoreItems();
+if (SAVE_ENABLED) {
+  SaveSystem.loadResources(ALL_RESOURCES);
+  SaveSystem.loadStoreItems();
+}
+
 Store.reDraw();
 pm.check();
 

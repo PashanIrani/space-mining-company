@@ -6,6 +6,7 @@ const MAX_MINUTE = 59;
 const MAX_HOUR = 23;
 const MAX_MONTH = 12;
 
+const TIME_TICK_SPEED = 1000;
 export class Time {
   private _minute: number;
   private _hour: number;
@@ -100,7 +101,7 @@ export class Time {
   }
 
   startTime() {
-    setInterval(this.tick.bind(this), 250);
+    setInterval(this.tick.bind(this), TIME_TICK_SPEED);
   }
 
   getFormatedTime(): string {
