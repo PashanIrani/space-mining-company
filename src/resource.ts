@@ -1,6 +1,7 @@
 import { UI_displayValue, UI_displayText, UI_updateProgressBar } from "./ui";
 import { Cost, Cost_getCostDisplayString } from "./cost";
 import { formatNumberString } from "./helpers";
+import { Time } from "./time";
 
 
 export interface ResourceDefination {
@@ -10,10 +11,13 @@ export interface ResourceDefination {
   capacity?: number; // The max capacity of this resource
   costs: Cost[]; // the cost for generating this resource
   timeToBuildMs: number; // This is how long it would take to build this resource
-  afterNewGeneration?: Function; // Function that runs after a new generation is complete
+  afterNewGeneration?: (amount: number, amountDelta: number) => void; // Function that runs after a new generation is complete
   afterDeduction?: Function; // Function that runs after this resource is deducted for a transaction
   holdToGenerateAmount?: number;
+  timeCost?: number; // amount of time incremented per generation
 }
+
+export type AllResourceDefination = { [key: string]: Resource };
 
 export interface GroupResouceDefination {
   name: string,
@@ -60,15 +64,24 @@ export class Resource {
   private _ratePerSec: number;
   private _holdToGenerateAmount: number;
 
+  private _timeCost: number;
+
   private _updatedFromSave: boolean = false; // set this to true after loading values from a save. To trigger in-progress builds to finish
 
   public buildQueue: number[] = []; // keeps track of builds being queued and how much amount to generate, incase generateAmount changes while still in queue
   private onAmountUpdateCallbacks: Function[] = []; // holds functions that need to be called when amount is updated.
 
+  private timeObject: Time;
+
   private holdIntervalId: NodeJS.Timeout; // points to interval created for mouse hold behaviour
 
-  constructor(defination: ResourceDefination) {
+  constructor(defination: ResourceDefination, time: Time) {
+    this._afterNewGeneration = defination.afterNewGeneration ? defination.afterNewGeneration : () => { };
+    this._afterDeduction = defination.afterDeduction ? defination.afterDeduction : () => { };
+
+
     this.name = defination.name;
+    this.timeObject = time;
 
     // not using private here to allow setter to run on init
     this.generateAmount = defination.generateAmount;
@@ -77,9 +90,7 @@ export class Resource {
     this.amount = defination.amount;
     this.timeToBuildMs = defination.timeToBuildMs;
     this.holdToGenerateAmount = defination.holdToGenerateAmount || 0;
-
-    this._afterNewGeneration = defination.afterNewGeneration ? defination.afterNewGeneration : () => { };
-    this._afterDeduction = defination.afterDeduction ? defination.afterDeduction : () => { };
+    this.timeCost = defination.timeCost || 0;
 
     this.assignEventListeners();
     this.initRateCalculation();
@@ -156,16 +167,19 @@ export class Resource {
   }
 
   set amount(value: number) {
+    let delta = value - this._amount;
+
     if (value > this.capacity) {
       this._amount = this.capacity;
     } else {
       this._amount = value;
     }
 
+    // call on amoutn update callbacks
     this.onAmountUpdateCallbacks.forEach(fn => fn());
 
     UI_updateProgressBar(this.name, this.amount, this.capacity);
-    UI_displayValue(this.name, 'amount', this.amount);
+    UI_displayValue(this.name, 'amount', this.amount, 2);
   }
 
   get capacity(): number {
@@ -174,9 +188,19 @@ export class Resource {
 
   set capacity(value: number) {
     this._capacity = value;
-    UI_displayValue(this.name, 'capacity', this.capacity);
+    UI_displayValue(this.name, 'capacity', this.capacity, 2);
     UI_updateProgressBar(this.name, this.amount, this.capacity);
   }
+
+  get timeCost(): number {
+    return this._timeCost;
+  }
+
+  set timeCost(value: number) {
+    this._timeCost = value;
+    UI_displayValue(this.name, 'time-cost', this.capacity, 2);
+  }
+
 
   get costs(): Cost[] {
     return this._costs;
@@ -280,14 +304,33 @@ export class Resource {
   private initiateBuild() {
     if (this.timeToBuildMs > 0) {
       const timePerPercent = this.timeToBuildMs / 100; // the frequency of build percentage update
+      // const timeBeforeBuild = this.timeObject.minute;
 
       const percentTickInterval = setInterval(() => {
         this.buildStatus += 0.01;
       }, timePerPercent);
 
+
+      let timeCostTickInterval: NodeJS.Timer = null;
+      // Increment minutes as it build
+      if (this.timeCost > 1) {
+        const timePerTimeCostMin = this.timeToBuildMs / this.timeCost;
+        timeCostTickInterval = setInterval(() => {
+          this.timeObject.minute += 1;
+        }, timePerTimeCostMin);
+      }
+
       setTimeout(() => {
         this.build(this.buildQueue.shift());
         clearInterval(percentTickInterval);
+
+        // Clear timeCost update interval
+        if (this.timeCost > 1) {
+          clearInterval(timeCostTickInterval);
+        } else if (this.timeCost == 1) { // if timecost was 1, then simply increment at the end, as there was no need to do it with ticks
+          this.timeObject.minute += 1;
+        }
+
         this.buildStatus = 0;
         this.checkIfToInitateAnotherBuild();
       }, this.timeToBuildMs * (1 - this.buildStatus));
@@ -307,7 +350,10 @@ export class Resource {
   //! Only run after it is fully okay to build after checks with canAffordGeneration() and ONLY after Resource_performCostTransaction()
   private build(amount: number = this.generateAmount) {
     this.amount += amount;
-    this._afterNewGeneration();
+    this._afterNewGeneration(this.amount, amount);
+
+    if (this.timeToBuildMs == 0)
+      this.timeObject.minute += this.timeCost;
   }
 
   performDeduction(amountToDeduct: number) {
@@ -320,7 +366,7 @@ export class GroupResource extends Resource {
   private _groupResources: Resource[]; // range from 0 to 1 indicating percentage
   private _lastAccessedResource: number = 0;
 
-  constructor(defination: GroupResouceDefination) {
+  constructor(defination: GroupResouceDefination, timeObject: Time) {
     // send some dummy data that won't really be used through a GroupResource
     super({
       name: defination.name,
@@ -328,7 +374,7 @@ export class GroupResource extends Resource {
       generateAmount: 1,
       costs: [],
       timeToBuildMs: 0,
-    });
+    }, timeObject);
 
     this._groupResources = defination.groupResources;
     setInterval(this.calculateTotalAmount.bind(this), 100);

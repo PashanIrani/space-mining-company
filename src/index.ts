@@ -1,4 +1,4 @@
-import { Resource, GroupResource } from "./resource"
+import { Resource, GroupResource, AllResourceDefination } from "./resource"
 import { Time } from './time'
 import { doGlitchEffect } from "./ui"
 import './styles/index.scss';
@@ -7,7 +7,7 @@ import { Store, StoreDefination, StoreItem } from "./store";
 import { SaveSystem } from "./saveSystem";
 
 const DEV = true;
-const SAVE_ENABLED = false;
+const SAVE_ENABLED = true;
 
 const savedTimeData = SAVE_ENABLED ? SaveSystem.loadTime() : null;
 let time: Time;
@@ -15,12 +15,7 @@ let time: Time;
 if (savedTimeData) {
   time = new Time(savedTimeData.minute, savedTimeData.hour, savedTimeData.day, savedTimeData.month, savedTimeData.year);
 } else {
-  const currentDate = new Date();
-
-  const currentYear = currentDate.getFullYear();
-  const currentMonth = currentDate.getMonth() + 1; // getMonth() returns 0-based index, so add 1
-  const currentDay = currentDate.getDate();
-  time = new Time(0, 0, currentDay, currentMonth, currentYear);
+  time = new Time(0, 0, 0, 1, 0);
 }
 
 const energy = new Resource({
@@ -30,8 +25,9 @@ const energy = new Resource({
   capacity: 100,
   costs: [],
   timeToBuildMs: 0,
-  holdToGenerateAmount: 0
-});
+  holdToGenerateAmount: 0,
+  timeCost: 1
+}, time);
 
 const funds = new Resource({
   name: 'funds',
@@ -40,9 +36,9 @@ const funds = new Resource({
   capacity: 1000,
   costs: [{ resource: energy, amount: 10 }],
   timeToBuildMs: 1000,
-});
+}, time);
 
-const ALL_RESOURCES: { [key: string]: Resource } = { energy, funds };
+const ALL_RESOURCES: AllResourceDefination = { energy, funds };
 
 const store = new Store({
   'profit1': {
@@ -131,9 +127,7 @@ for (const key in ALL_RESOURCES) {
   })
 }
 
-// Save game every 1s
 setInterval(() => {
-  SaveSystem.saveResources(ALL_RESOURCES);
-  SaveSystem.saveTime(time);
-  SaveSystem.saveStoreItems();
+  SaveSystem.saveAll(ALL_RESOURCES, time);
 }, 1000);
+

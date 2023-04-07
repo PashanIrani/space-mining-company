@@ -1,3 +1,4 @@
+import { formatNumberString } from "./helpers";
 import { Resource } from "./resource";
 import { UI_displayValue, UI_displayText } from "./ui";
 
@@ -6,7 +7,7 @@ const MAX_MINUTE = 59;
 const MAX_HOUR = 23;
 const MAX_MONTH = 12;
 
-const TIME_TICK_SPEED = 1000;
+const TIME_TICK_SPEED = 1000 * 60;
 export class Time {
   private _minute: number;
   private _hour: number;
@@ -31,7 +32,7 @@ export class Time {
   }
 
   set minute(value: number) {
-    if (value == MAX_MINUTE + 1) {
+    if (value >= MAX_MINUTE + 1) {
       value = 0;
       this.hour++;
     }
@@ -52,7 +53,6 @@ export class Time {
     }
 
     this._hour = value;
-    // UI_displayValue('time', 'hourValue', this._hour, 0, 2);
     UI_displayText('time', 'formattedTime', this.getFormatedTime());
     UI_displayText('time', 'timeOfDayLabel', this.getLabelOfTime());
   }
@@ -63,11 +63,10 @@ export class Time {
 
   set day(value: number) {
     if (value == DAYS_PER_MONTH[this.month - 1] + 1) {
-      value = 1; // first day is 1 not 0 bro
+      value = 1; // first day is 1 not 0
       this.month++;
     }
     this._day = value;
-    // UI_displayValue('time', 'dayValue', this._day);
     UI_displayText('time', 'formattedDate', this.getFormatedDate());
   }
 
@@ -119,7 +118,7 @@ export class Time {
 
     const formattedMins = this.minute < 10 ? `0${this.minute}` : this.minute;
 
-    return `${formattedHour}:${formattedMins} ${ampm}`;
+    return `${formattedHour}:${formatNumberString(this.minute, 0, 2)} ${ampm}`;
   }
 
   getFormatedDate(): string {

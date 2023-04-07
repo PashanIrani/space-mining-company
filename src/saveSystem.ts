@@ -1,4 +1,4 @@
-import { Resource } from "./resource";
+import { AllResourceDefination, Resource } from "./resource";
 import { Store } from "./store";
 import { Time } from "./time";
 
@@ -19,6 +19,12 @@ interface ResourceData {
 }
 
 export class SaveSystem {
+  static saveAll(ALL_RESOURCES: AllResourceDefination, time: Time) {
+    this.saveResources(ALL_RESOURCES);
+    this.saveTime(time);
+    this.saveStoreItems();
+  }
+
   static saveTime(time: Time) {
     let timeData = {
       minute: time.minute,
@@ -61,12 +67,11 @@ export class SaveSystem {
     }
   }
 
-  static saveResources(resources: { [key: string]: Resource }) {
+  static saveResources(resources: AllResourceDefination) {
     let resourceData: ResourceData = {};
 
     for (const key in resources) {
       const resource = resources[key];
-      console.log(resource);
 
       resourceData[resource.name] = {
         amount: resource.amount,
@@ -79,18 +84,15 @@ export class SaveSystem {
       }
     }
 
-    console.log(resourceData);
-
     localStorage.setItem(RESOURCES, JSON.stringify(resourceData));
   }
 
-  static loadResources(resources: { [key: string]: Resource }) {
+  static loadResources(resources: AllResourceDefination) {
     let resourcesDataString = localStorage.getItem(RESOURCES);
 
     if (resourcesDataString == null) return;
 
     let resourcesData: ResourceData = JSON.parse(resourcesDataString);
-    console.log(resourcesData);
 
     for (const key in resources) {
       const resource = resources[key];
@@ -101,7 +103,6 @@ export class SaveSystem {
       resource.holdToGenerateAmount = resourcesData[key].holdToGenerateAmount;
       resource.buildQueue = resourcesData[key].buildQueue;
       resource.buildStatus = resourcesData[key].buildStatus;
-      console.log(resourcesData[key]);
       resource.updatedFromSave = true;
     }
   }
