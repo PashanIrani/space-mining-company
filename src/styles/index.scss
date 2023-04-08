@@ -35,7 +35,6 @@ body {
   background-color: $background-color;
   font-family: "Pixelated MS Sans Serif", Arial;
   -webkit-font-smoothing: antialiased;
-  // font-size: ;
   color: #000000;
 }
 
@@ -117,13 +116,12 @@ fieldset {
   border-style: groove;
   border-color: rgb(192, 192, 192);
   border-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='5' height='5' fill='gray' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M0 0h5v5H0V2h2v1h1V2H0' fill='%23fff'/%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M0 0h4v4H0V1h1v2h2V1H0'/%3E%3C/svg%3E") 2;
-  max-height: 75px;
+  min-height: 75px;
   justify-content: space-between;
   margin: 10px 0px;
   background: linear-gradient(180deg, #fcfcfe, #f4f3ee);
 
   div {
-    height: 75px;
     display: flex;
     flex-direction: column;
     justify-content: center;

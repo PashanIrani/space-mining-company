@@ -44,7 +44,11 @@
           <p>Date: <span id="time-formattedDate"></span></p>
           <p>Time: <span id="time-formattedTime"></span> (<span id="time-timeOfDayLabel"></span>)</p>
         </fieldset>
-
+        <fieldset class="no-background basic-border">
+          <legend class="match-text">System Info</legend>
+          <p><span id="time-since-last-save"></span></p>
+        </fieldset>
+        <button onclick="clearLocalStorageAndReload()">Restart</button>
 
       </div>
     </div>
@@ -135,6 +139,14 @@
   </div>
 
   <script src="/scripts/index.js"></script>
+  <script>
+    function clearLocalStorageAndReload() {
+      if (confirm("Are you sure you want to do this?")) {
+        localStorage.clear();
+        location.reload();
+      }
+    }
+  </script>
 </body>
 
 </html>

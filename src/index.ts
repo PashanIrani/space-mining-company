@@ -1,10 +1,10 @@
 import { Resource, GroupResource, AllResourceDefination } from "./resource"
 import { Time } from './time'
-import { doGlitchEffect } from "./ui"
+import { UI_displayText, doGlitchEffect } from "./ui"
 import './styles/index.scss';
 import { PacingManger } from "./pacingManager";
 import { Store, StoreDefination, StoreItem } from "./store";
-import { SaveSystem } from "./saveSystem";
+import { SaveSystem, beginSaving } from "./saveSystem";
 
 const DEV = true;
 const SAVE_ENABLED = true;
@@ -127,7 +127,5 @@ for (const key in ALL_RESOURCES) {
   })
 }
 
-setInterval(() => {
-  SaveSystem.saveAll(ALL_RESOURCES, time);
-}, 1000);
+beginSaving(ALL_RESOURCES, time);
 

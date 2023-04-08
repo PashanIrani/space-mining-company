@@ -1,6 +1,7 @@
 import { AllResourceDefination, Resource } from "./resource";
 import { Store } from "./store";
 import { Time } from "./time";
+import { UI_displayText } from "./ui";
 
 const RESOURCES = "resources";
 const STORE_ITEMS = "storeItems";
@@ -18,11 +19,34 @@ interface ResourceData {
   }
 }
 
+const SAVE_FREQUENCY = 1000 * 5;
+
+export function beginSaving(ALL_RESOURCES: AllResourceDefination, time: Time) {
+
+  SaveSystem.saveAll(ALL_RESOURCES, time); // save on init first time
+
+  setInterval(() => {
+    SaveSystem.saveAll(ALL_RESOURCES, time);
+  }, SAVE_FREQUENCY);
+
+  // Show time since last save
+  setInterval(() => {
+    let now = new Date();
+    const startTimestamp = Math.floor(SaveSystem.lastSaveTime.getTime() / 1000);
+    const endTimestamp = Math.floor(now.getTime() / 1000);
+
+    const secondsElapsed = endTimestamp - startTimestamp;
+    UI_displayText("time", "since-last-save", secondsElapsed == 0 ? `Saved!` : `${secondsElapsed}s since last save...`)
+  }, 1000);
+}
 export class SaveSystem {
+  static lastSaveTime: Date;
+
   static saveAll(ALL_RESOURCES: AllResourceDefination, time: Time) {
     this.saveResources(ALL_RESOURCES);
     this.saveTime(time);
     this.saveStoreItems();
+    this.lastSaveTime = new Date();
   }
 
   static saveTime(time: Time) {
