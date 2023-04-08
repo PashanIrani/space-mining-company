@@ -1,3 +1,4 @@
+import { ALL_RESOURCES } from ".";
 import { AllResourceDefination, Resource } from "./resource";
 import { Store } from "./store";
 import { Time } from "./time";
@@ -21,12 +22,12 @@ interface ResourceData {
 
 const SAVE_FREQUENCY = 1000 * 5;
 
-export function beginSaving(ALL_RESOURCES: AllResourceDefination, time: Time) {
+export function beginSaving() {
 
-  SaveSystem.saveAll(ALL_RESOURCES, time); // save on init first time
+  SaveSystem.saveAll(); // save on init first time
 
   setInterval(() => {
-    SaveSystem.saveAll(ALL_RESOURCES, time);
+    SaveSystem.saveAll();
   }, SAVE_FREQUENCY);
 
   // Show time since last save
@@ -42,20 +43,20 @@ export function beginSaving(ALL_RESOURCES: AllResourceDefination, time: Time) {
 export class SaveSystem {
   static lastSaveTime: Date;
 
-  static saveAll(ALL_RESOURCES: AllResourceDefination, time: Time) {
-    this.saveResources(ALL_RESOURCES);
-    this.saveTime(time);
+  static saveAll() {
+    this.saveResources();
+    this.saveTime();
     this.saveStoreItems();
     this.lastSaveTime = new Date();
   }
 
-  static saveTime(time: Time) {
+  static saveTime() {
     let timeData = {
-      minute: time.minute,
-      hour: time.hour,
-      day: time.day,
-      month: time.month,
-      year: time.year
+      minute: Time.minute,
+      hour: Time.hour,
+      day: Time.day,
+      month: Time.month,
+      year: Time.year
     }
 
     localStorage.setItem(TIME, JSON.stringify(timeData));
@@ -91,11 +92,12 @@ export class SaveSystem {
     }
   }
 
-  static saveResources(resources: AllResourceDefination) {
+  static saveResources() {
     let resourceData: ResourceData = {};
 
-    for (const key in resources) {
-      const resource = resources[key];
+    for (const key in ALL_RESOURCES) {
+
+      const resource = ALL_RESOURCES[key];
 
       resourceData[resource.name] = {
         amount: resource.amount,

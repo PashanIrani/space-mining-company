@@ -1,6 +1,5 @@
 import { formatNumberString } from "./helpers";
-import { Resource } from "./resource";
-import { UI_displayValue, UI_displayText } from "./ui";
+import { UI_displayText } from "./ui";
 
 const DAYS_PER_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 const MAX_MINUTE = 59;
@@ -9,14 +8,14 @@ const MAX_MONTH = 12;
 
 const TIME_TICK_SPEED = 1000 * 60;
 export class Time {
-  private _minute: number;
-  private _hour: number;
-  private _day: number;
-  private _month: number;
-  private _year: number;
+  static _minute: number;
+  static _hour: number;
+  static _day: number;
+  static _month: number;
+  static _year: number;
 
 
-  constructor(minute: number = 0, hour: number = 0, day: number = 1, month: number = 1, year: number = 0) {
+  static setInitTime(minute: number = 0, hour: number = 0, day: number = 1, month: number = 1, year: number = 0) {
     this.minute = minute;
     this.hour = hour;
     this.day = day;
@@ -27,11 +26,11 @@ export class Time {
 
   }
 
-  get minute() {
+  static get minute() {
     return this._minute;
   }
 
-  set minute(value: number) {
+  static set minute(value: number) {
     if (value >= MAX_MINUTE + 1) {
       value = 0;
       this.hour++;
@@ -42,11 +41,11 @@ export class Time {
     UI_displayText('time', 'formattedTime', this.getFormatedTime());
   }
 
-  get hour() {
+  static get hour() {
     return this._hour;
   }
 
-  set hour(value: number) {
+  static set hour(value: number) {
     if (value == MAX_HOUR + 1) {
       value = 0;
       this.day++;
@@ -57,11 +56,11 @@ export class Time {
     UI_displayText('time', 'timeOfDayLabel', this.getLabelOfTime());
   }
 
-  get day() {
+  static get day() {
     return this._day;
   }
 
-  set day(value: number) {
+  static set day(value: number) {
     if (value == DAYS_PER_MONTH[this.month - 1] + 1) {
       value = 1; // first day is 1 not 0
       this.month++;
@@ -70,11 +69,11 @@ export class Time {
     UI_displayText('time', 'formattedDate', this.getFormatedDate());
   }
 
-  get month() {
+  static get month() {
     return this._month;
   }
 
-  set month(value: number) {
+  static set month(value: number) {
     if (value == MAX_MONTH + 1) {
       value = 1; // first month is also a 1 not 0
       this.year++;
@@ -85,25 +84,25 @@ export class Time {
     UI_displayText('time', 'formattedDate', this.getFormatedDate());
   }
 
-  get year() {
+  static get year() {
     return this._year;
   }
 
-  set year(value: number) {
+  static set year(value: number) {
     this._year = value;
     // UI_displayValue('time', 'yearValue', this._year);
     UI_displayText('time', 'formattedDate', this.getFormatedDate());
   }
 
-  tick() {
+  static tick() {
     this.minute++;
   }
 
-  startTime() {
+  static startTime() {
     setInterval(this.tick.bind(this), TIME_TICK_SPEED);
   }
 
-  getFormatedTime(): string {
+  static getFormatedTime(): string {
     let ampm = "AM";
     let formattedHour = this.hour;
 
@@ -121,7 +120,7 @@ export class Time {
     return `${formattedHour}:${formatNumberString(this.minute, 0, 2)} ${ampm}`;
   }
 
-  getFormatedDate(): string {
+  static getFormatedDate(): string {
     const months = [
       "January",
       "February",
@@ -151,7 +150,7 @@ export class Time {
     return `${this.day}${suffix} ${formattedMonth}, ${this.year}`;
   }
 
-  getLabelOfTime(): string {
+  static getLabelOfTime(): string {
     let hour = this.hour;
 
     if (hour < 4) {

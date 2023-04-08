@@ -41,12 +41,12 @@
         <p>Welcome to Space Mining Company!</p>
         <fieldset class="no-background basic-border">
           <legend class="match-text">General Info</legend>
-          <p>Date: <span id="time-formattedDate"></span></p>
-          <p>Time: <span id="time-formattedTime"></span> (<span id="time-timeOfDayLabel"></span>)</p>
+          <p class="info-label">Date: <span id="time-formattedDate"></span></p>
+          <p class="info-label">Time: <span id="time-formattedTime"></span> (<span id="time-timeOfDayLabel"></span>)</p>
         </fieldset>
         <fieldset class="no-background basic-border">
           <legend class="match-text">System Info</legend>
-          <p><span id="time-since-last-save"></span></p>
+          <p class="info-label"><span id="time-since-last-save"></span></p>
         </fieldset>
         <button onclick="clearLocalStorageAndReload()">Restart</button>
 
@@ -61,7 +61,7 @@
   <div class="row">
     <div id="energy-window" class="window">
       <div class="title-bar">
-        <div class="title-bar-text">Energy</div>
+        <div class="title-bar-text">Energy (<span id="energyGroup-amount"></span>)</div>
         <div class="title-bar-controls">
           <button aria-label="Minimize"></button>
           <button aria-label="Maximize"></button>
@@ -70,21 +70,49 @@
       </div>
       <div class="window-body">
         <p>The lifeblood of progress, without it, all crumbles.</p>
-        <p>Energy: <span id="energy-buildStatus"></span><span id="energy-amount"></span>/<span
-            id="energy-capacity"></span>
-        </p>
-        <div class="progress-bar-container"><span id="energy-progress-bar"></span></div>
+        <!-- LABOR -->
+        <fieldset class="resource no-background basic-border">
+          <p>Labor: <span id="labor-buildStatus"></span><span id="labor-amount"></span>/<span
+              id="labor-capacity"></span>
+          </p>
+          <div class="progress-bar-container"><span id="labor-progress-bar"></span></div>
 
-        <div class="button-container">
-          <div>
-            <button id="energy-generate-button">Generate Energy (<span id="energy-generate-amount"></span>)</button>
-            <p class="hold-button-text" id="energy-hold-amount"></p>
+          <div class="button-container">
+            <span class="rate-text">Rate: <span id="labor-rate"></span></span>
+            <div>
+              <button id="labor-generate-button">Generate Energy (<span id="labor-generate-amount"></span>)</button>
+              <p class="hold-button-text" id="labor-hold-amount"></p>
+            </div>
           </div>
-        </div>
+        </fieldset>
+
+        <!-- COFFEE -->
+        <fieldset class="resource no-background basic-border">
+          <p>Coffee: <span id="coffee-buildStatus"></span><span id="coffee-amount"></span>/<span
+              id="coffee-capacity"></span>
+          </p>
+          <p>
+            Cost: <span id="coffee-costs"></span>
+          </p>
+          <div class="progress-bar-container"><span id="coffee-progress-bar"></span></div>
+
+          <div class="button-container">
+            <span class="rate-text">Rate: <span id="coffee-rate"></span></span>
+            <div>
+
+            </div>
+            <div>
+              <button id="coffee-generate-button">Generate Energy (<span id="coffee-generate-amount"></span>)</button>
+              <p class="hold-button-text" id="coffee-hold-amount"></p>
+            </div>
+          </div>
+        </fieldset>
 
       </div>
+
+
       <div class="status-bar">
-        <p class="status-bar-field">Rate: <span id="energy-rate"></span></p>
+        <p class="status-bar-field">Rate: <span id="energyGroup-rate"></span></p>
       </div>
     </div>
   </div>
@@ -106,6 +134,7 @@
         </p>
         <p>Cost: <span id="funds-costs"></span></p>
         <div class="button-container">
+          <div></div>
           <div>
             <button id="funds-generate-button">Generate Funds (<span id="funds-generate-amount"></span>)</button>
             <p class="hold-button-text" id="funds-hold-amount"></p>

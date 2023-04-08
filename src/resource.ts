@@ -2,10 +2,11 @@ import { UI_displayValue, UI_displayText, UI_updateProgressBar } from "./ui";
 import { Cost, Cost_getCostDisplayString } from "./cost";
 import { formatNumberString } from "./helpers";
 import { Time } from "./time";
-
+import { ALL_RESOURCES } from ".";
 
 export interface ResourceDefination {
   name: string; // name is used for linking things together
+  label: string // name shown on screen
   amount: number; // the actual value of this resource at the current instance
   generateAmount: number; // The amount of resource is genereated when this resource is generated
   capacity?: number; // The max capacity of this resource
@@ -21,14 +22,15 @@ export type AllResourceDefination = { [key: string]: Resource };
 
 export interface GroupResouceDefination {
   name: string,
-  groupResources: Resource[]
+  label: string // name shown on screen
+  groupResources: { resource: Resource, multiplier: number }[]
 }
 // checks if all the costs are met
 export function Resource_canAffordGeneration(costs: Cost[]): boolean {
   for (let i = 0; i < costs.length; i++) {
     const cost = costs[i];
 
-    if (cost.resource.amount < cost.amount) {
+    if (ALL_RESOURCES[cost.resource].amount < cost.amount) {
       return false;
     }
   }
@@ -41,11 +43,11 @@ export function Resource_performCostTransaction(costs: Cost[]): boolean {
   for (let i = 0; i < costs.length; i++) {
     const cost = costs[i];
 
-    if (cost.resource.amount < cost.amount) {
+    if (ALL_RESOURCES[cost.resource].amount < cost.amount) {
       return false;
     }
 
-    cost.resource.performDeduction(cost.amount);
+    ALL_RESOURCES[cost.resource].performDeduction(cost.amount);
   }
 
   return true;
@@ -53,6 +55,7 @@ export function Resource_performCostTransaction(costs: Cost[]): boolean {
 
 export class Resource {
   readonly name: string;
+  readonly label: string;
   private _amount: number;
   private _generateAmount: number;
   private _capacity: number;
@@ -71,22 +74,20 @@ export class Resource {
   public buildQueue: number[] = []; // keeps track of builds being queued and how much amount to generate, incase generateAmount changes while still in queue
   private onAmountUpdateCallbacks: Function[] = []; // holds functions that need to be called when amount is updated.
 
-  private timeObject: Time;
-
   private holdIntervalId: NodeJS.Timeout; // points to interval created for mouse hold behaviour
 
-  constructor(defination: ResourceDefination, time: Time) {
+  constructor(defination: ResourceDefination) {
     this._afterNewGeneration = defination.afterNewGeneration ? defination.afterNewGeneration : () => { };
     this._afterDeduction = defination.afterDeduction ? defination.afterDeduction : () => { };
 
 
     this.name = defination.name;
-    this.timeObject = time;
+    this.label = defination.label;
 
     // not using private here to allow setter to run on init
     this.generateAmount = defination.generateAmount;
     this.capacity = defination.capacity;
-    this.costs = defination.costs;
+    this._costs = defination.costs;
     this.amount = defination.amount;
     this.timeToBuildMs = defination.timeToBuildMs;
     this.holdToGenerateAmount = defination.holdToGenerateAmount || 0;
@@ -95,10 +96,15 @@ export class Resource {
     this.assignEventListeners();
     this.initRateCalculation();
 
+  }
+
+  init() {
+    this.costs = this._costs; // trigger change 
+
     // when a cost's amount is updated, update string for this resource by give each cost resource a callback
     for (let i = 0; i < this.costs.length; i++) {
       const cost = this.costs[i];
-      cost.resource.onAmountUpdate(() => {
+      ALL_RESOURCES[cost.resource].onAmountUpdate(() => {
         UI_displayText(this.name, 'costs', Cost_getCostDisplayString(this.costs));
       });
     }
@@ -316,7 +322,7 @@ export class Resource {
       if (this.timeCost > 1) {
         const timePerTimeCostMin = this.timeToBuildMs / this.timeCost;
         timeCostTickInterval = setInterval(() => {
-          this.timeObject.minute += 1;
+          Time.minute += 1;
         }, timePerTimeCostMin);
       }
 
@@ -328,7 +334,7 @@ export class Resource {
         if (this.timeCost > 1) {
           clearInterval(timeCostTickInterval);
         } else if (this.timeCost == 1) { // if timecost was 1, then simply increment at the end, as there was no need to do it with ticks
-          this.timeObject.minute += 1;
+          Time.minute += 1;
         }
 
         this.buildStatus = 0;
@@ -353,7 +359,7 @@ export class Resource {
     this._afterNewGeneration(this.amount, amount);
 
     if (this.timeToBuildMs == 0)
-      this.timeObject.minute += this.timeCost;
+      Time.minute += this.timeCost;
   }
 
   performDeduction(amountToDeduct: number) {
@@ -363,38 +369,43 @@ export class Resource {
 }
 
 export class GroupResource extends Resource {
-  private _groupResources: Resource[]; // range from 0 to 1 indicating percentage
+  private _groupResources: { resource: Resource, multiplier: number }[]; // range from 0 to 1 indicating percentage
   private _lastAccessedResource: number = 0;
 
-  constructor(defination: GroupResouceDefination, timeObject: Time) {
+  constructor(defination: GroupResouceDefination) {
     // send some dummy data that won't really be used through a GroupResource
     super({
       name: defination.name,
+      label: defination.label,
       amount: 0,
       generateAmount: 1,
       costs: [],
       timeToBuildMs: 0,
-    }, timeObject);
+    });
 
     this._groupResources = defination.groupResources;
-    setInterval(this.calculateTotalAmount.bind(this), 100);
+
+    // Re-calculate when one of the amounts changes
+    for (let i = 0; i < this._groupResources.length; i++) {
+      this._groupResources[i].resource.onAmountUpdate(this.calculateTotalAmount.bind(this));
+    }
   }
 
   private calculateTotalAmount() {
     let sum = 0;
 
     for (let i = 0; i < this._groupResources.length; i++) {
-      sum += this._groupResources[i].amount;
+      sum += this._groupResources[i].resource.amount * this._groupResources[i].multiplier;
     }
 
     this.amount = sum;
   }
 
-  get groupResources(): Resource[] {
+  get groupResources(): { resource: Resource, multiplier: number }[] {
     return this._groupResources;
   }
 
-  set groupResources(value: Resource[]) {
+  set groupResources(value: { resource: Resource, multiplier: number }[]) {
     this._groupResources = value;
   }
 
@@ -422,9 +433,9 @@ export class GroupResource extends Resource {
 
       const resourceOf = this.groupResources[i];
 
-      if (resourceOf.amount >= amountToDeduct) {
+      if (resourceOf.resource.amount * resourceOf.multiplier >= amountToDeduct) {
         this.lastAccessedResource = i;
-        resourceOf.performDeduction(amountToDeduct);
+        resourceOf.resource.performDeduction(amountToDeduct / resourceOf.multiplier);
         run = false;
       }
       i++;

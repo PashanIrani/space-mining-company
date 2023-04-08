@@ -65,28 +65,39 @@ body {
   }
 
   margin: 10px;
+  margin-left: 0px;
 }
 
-progress {
-  -webkit-appearance: none;
-  appearance: none;
+.progress-bar-inline {
+  margin-left: 10px;
+  margin-right: 15px;
 
-  &::-webkit-progress-value,
-  &::-moz-progress-bar {
-    transition: width 0.5s ease-in-out;
+  progress {
+    transform: translateY(-2px);
   }
+}
 
+.one-line-resource {}
+
+.generate-button-inline {
+  transform: translateY(-2px);
+  margin-left: 10px;
+  margin-right: 10px;
 }
 
 .button-container {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   margin: 10px 10px 0px 0px;
+}
 
-  .hold-button-text {
-    font-size: 10px;
-    text-align: center;
-  }
+.rate-text {
+  font-size: 10px;
+}
+
+.hold-button-text {
+  font-size: 10px;
+  text-align: center;
 }
 
 fieldset {
@@ -105,8 +116,12 @@ fieldset {
     color: $text-color;
   }
 
-  p {
+  p.info-label {
     margin: 2px 0px;
+  }
+
+  &.resource {
+    font-size: 14px;
   }
 }
 
