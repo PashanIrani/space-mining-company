@@ -7,29 +7,30 @@ export function UI_displayValue(name: string, valueType: string, value: number, 
   if (value !== 0 && !value)
     return;
 
-  const element = document.getElementById(`${name}-${valueType}`);
+  const elements = document.querySelectorAll(`.${name}-${valueType}`);
 
-
-
-  if (element && value != null)
+  elements.forEach(element => {
     element.innerHTML = formatNumberString(value, decimals, charLength);
+  });
 }
 
 export function UI_displayText(name: string, valueType: string, text: string) {
-  const element = document.getElementById(`${name}-${valueType}`);
+  const elements = document.querySelectorAll(`.${name}-${valueType}`);
 
-  if (element && text != null)
+  elements.forEach(element => {
     element.innerHTML = text;
+  });
 }
 
 export function UI_updateProgressBar(name: string, amount: number = 0, capacity: number = 1) {
-  const element = document.getElementById(`${name}-progress-bar`);
+  const elements = document.querySelectorAll(`.${name}-progress-bar`);
+  console.log(elements, `${name}-progress-bar`);
 
-  if (element) {
-    element.innerHTML = `<progress max="${capacity}" value="${amount}"></progress>`
-  }
+  elements.forEach(element => {
+    element.innerHTML = `<progress max="${capacity}" value="${amount}"></progress>`;
+  });
 }
-
+// Shows HTML element with id of `name`-window
 export function UI_showWindow(name: string) {
   const element = document.getElementById(`${name}-window`);
 
@@ -39,7 +40,7 @@ export function UI_showWindow(name: string) {
     element.style.position = 'static';
   }
 }
-
+// Hides HTML element with id of `name`-window
 export function UI_hideWindow(name: string) {
   const element = document.getElementById(`${name}-window`);
 

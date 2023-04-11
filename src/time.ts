@@ -14,6 +14,15 @@ export class Time {
   static _month: number;
   static _year: number;
 
+  static newGameTime: { minute: number, hour: number, day: number, month: number, year: number };
+
+  static setNewGameTime(minute: number = 0, hour: number = 0, day: number = 1, month: number = 1, year: number = 0) {
+    this.newGameTime = {
+      minute, hour, day, month, year
+    }
+
+    UI_displayText('time', 'established', `${this.getFormatedDate(this.newGameTime.day, this.newGameTime.month, this.newGameTime.year)} @ ${this.getFormatedTime(this.newGameTime.hour, this.newGameTime.minute)}`)
+  }
 
   static setInitTime(minute: number = 0, hour: number = 0, day: number = 1, month: number = 1, year: number = 0) {
     this.minute = minute;
@@ -102,25 +111,26 @@ export class Time {
     setInterval(this.tick.bind(this), TIME_TICK_SPEED);
   }
 
-  static getFormatedTime(): string {
+  static getFormatedTime(hour: number = this.hour, minute: number = this.minute): string {
     let ampm = "AM";
-    let formattedHour = this.hour;
+    let formattedHour = hour;
 
-    if (this.hour >= 12) {
+    if (hour >= 12) {
       ampm = "PM";
-      formattedHour = this.hour % 12;
+      formattedHour = hour % 12;
     }
 
     if (formattedHour === 0) {
       formattedHour = 12;
     }
 
-    const formattedMins = this.minute < 10 ? `0${this.minute}` : this.minute;
+    const formattedMins = minute < 10 ? `0${minute}` : minute;
 
-    return `${formattedHour}:${formatNumberString(this.minute, 0, 2)} ${ampm}`;
+    return `${formattedHour}:${formatNumberString(minute, 0, 2)} ${ampm}`;
   }
 
-  static getFormatedDate(): string {
+
+  static getFormatedDate(day: number = this.day, month: number = this.month, year: number = this.year): string {
     const months = [
       "January",
       "February",
@@ -136,23 +146,21 @@ export class Time {
       "December"
     ];
 
-    const formattedMonth = months[this.month - 1]; // adjust for zero-based index
+    const formattedMonth = months[month - 1]; // adjust for zero-based index
 
     let suffix = "th";
-    if (this.day === 1 || this.day === 21 || this.day === 31) {
+    if (day === 1 || day === 21 || day === 31) {
       suffix = "st";
-    } else if (this.day === 2 || this.day === 22) {
+    } else if (day === 2 || day === 22) {
       suffix = "nd";
-    } else if (this.day === 3 || this.day === 23) {
+    } else if (day === 3 || day === 23) {
       suffix = "rd";
     }
 
-    return `${this.day}${suffix} ${formattedMonth}, ${this.year}`;
+    return `${day}${suffix} ${formattedMonth}, ${year}`;
   }
 
-  static getLabelOfTime(): string {
-    let hour = this.hour;
-
+  static getLabelOfTime(hour: number = this.hour): string {
     if (hour < 4) {
       return "Late Night";
     } else if (hour < 6) {

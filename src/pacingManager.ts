@@ -15,7 +15,7 @@ export class PacingManger {
       this.introducedWindows = JSON.parse(alreadyIntroducedWindows);
     }
 
-    let hideWindows = [this._resources.funds.name, 'store'];
+    let hideWindows = [this._resources.funds.name, 'store', this._resources.coffee.name, 'stats'];
 
     for (let i = 0; i < hideWindows.length; i++) {
       if (this.introducedWindows.includes(hideWindows[i])) continue;
@@ -27,6 +27,7 @@ export class PacingManger {
   check() {
     if (this._resources.labor.amount >= 10) {
       this.showWindow(this._resources.funds.name);
+      this._resources.funds.enabled = true;
     }
 
     if (this._resources.funds.amount >= 5) {

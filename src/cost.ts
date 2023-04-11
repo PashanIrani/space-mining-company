@@ -6,7 +6,12 @@ export interface Cost {
 }
 
 export function Cost_getCostDisplayString(costs: Cost[]) {
+  if (costs.length == 0) {
+    return "FREE"
+  }
+
   let costDisplayText = "";
+
   for (let i = 0; i < costs.length; i++) {
     const cost = costs[i];
     costDisplayText += `<span ${!Resource_canAffordGeneration([cost]) ? 'class="cost-cant-afford"' : ''}>${ALL_RESOURCES[cost.resource].label.charAt(0).toUpperCase() + ALL_RESOURCES[cost.resource].label.slice(1).toLowerCase()} (${cost.amount})</span>`
@@ -15,5 +20,5 @@ export function Cost_getCostDisplayString(costs: Cost[]) {
     }
   }
 
-  return costDisplayText
+  return costDisplayText;
 }

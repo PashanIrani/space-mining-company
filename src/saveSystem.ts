@@ -7,6 +7,7 @@ import { UI_displayText } from "./ui";
 const RESOURCES = "resources";
 const STORE_ITEMS = "storeItems";
 const TIME = "timeData";
+const INIT_TIME = "initTimeData";
 
 interface ResourceData {
   [key: string]: {
@@ -20,7 +21,7 @@ interface ResourceData {
   }
 }
 
-const SAVE_FREQUENCY = 1000 * 5;
+const SAVE_FREQUENCY = 1000 * 10000;
 
 export function beginSaving() {
 
@@ -37,7 +38,7 @@ export function beginSaving() {
     const endTimestamp = Math.floor(now.getTime() / 1000);
 
     const secondsElapsed = endTimestamp - startTimestamp;
-    UI_displayText("time", "since-last-save", secondsElapsed == 0 ? `Saved!` : `${secondsElapsed}s since last save...`)
+    UI_displayText("save", "next", secondsElapsed == 0 ? `Next Save: Saving...` : `Next Save: In ${(SAVE_FREQUENCY / 1000) - secondsElapsed} seconds.`)
   }, 1000);
 }
 export class SaveSystem {
@@ -60,6 +61,25 @@ export class SaveSystem {
     }
 
     localStorage.setItem(TIME, JSON.stringify(timeData));
+  }
+
+  static saveNewGameDate(minute: number = 0, hour: number = 0, day: number = 1, month: number = 1, year: number = 0) {
+    let timeData = {
+      minute: minute,
+      hour: hour,
+      day: day,
+      month: month,
+      year: year
+    }
+
+    localStorage.setItem(INIT_TIME, JSON.stringify(timeData));
+  }
+
+  static loadNewGameDate() {
+    let timeData = localStorage.getItem(INIT_TIME);
+    if (timeData === null) return null;
+
+    return JSON.parse(timeData);
   }
 
   static loadTime() {

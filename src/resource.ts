@@ -16,6 +16,7 @@ export interface ResourceDefination {
   afterDeduction?: Function; // Function that runs after this resource is deducted for a transaction
   holdToGenerateAmount?: number;
   timeCost?: number; // amount of time incremented per generation
+  enabled: boolean; // true is resource has been introduced to player, false if not
 }
 
 export type AllResourceDefination = { [key: string]: Resource };
@@ -55,7 +56,7 @@ export function Resource_performCostTransaction(costs: Cost[]): boolean {
 
 export class Resource {
   readonly name: string;
-  readonly label: string;
+  private _label: string;
   private _amount: number;
   private _generateAmount: number;
   private _capacity: number;
@@ -68,6 +69,7 @@ export class Resource {
   private _holdToGenerateAmount: number;
 
   private _timeCost: number;
+  private _enabled: boolean;
 
   private _updatedFromSave: boolean = false; // set this to true after loading values from a save. To trigger in-progress builds to finish
 
@@ -92,6 +94,7 @@ export class Resource {
     this.timeToBuildMs = defination.timeToBuildMs;
     this.holdToGenerateAmount = defination.holdToGenerateAmount || 0;
     this.timeCost = defination.timeCost || 0;
+    this.enabled = defination.enabled;
 
     this.assignEventListeners();
     this.initRateCalculation();
@@ -165,6 +168,10 @@ export class Resource {
       generateButton.addEventListener('mousedown', this.mouseHoldStart.bind(this));
       generateButton.addEventListener('mouseup', this.mouseHoldEnd.bind(this));
       generateButton.addEventListener('mouseleave', this.mouseHoldEnd.bind(this));
+
+      generateButton.addEventListener('touchstart', this.mouseHoldStart.bind(this));
+      generateButton.addEventListener('touchend', this.mouseHoldEnd.bind(this));
+      generateButton.addEventListener('touchcancel', this.mouseHoldEnd.bind(this));
     }
   }
 
@@ -198,13 +205,30 @@ export class Resource {
     UI_updateProgressBar(this.name, this.amount, this.capacity);
   }
 
+  get enabled(): boolean {
+    return this._enabled;
+  }
+
+  set enabled(value: boolean) {
+    this._enabled = value;
+  }
+
   get timeCost(): number {
     return this._timeCost;
   }
 
   set timeCost(value: number) {
     this._timeCost = value;
-    UI_displayValue(this.name, 'time-cost', this.capacity, 2);
+    UI_displayValue(this.name, 'time-cost', this.timeCost, 2);
+  }
+
+  get label(): string {
+    return this._label;
+  }
+
+  set label(value: string) {
+    this._label = value;
+    UI_displayText(this.name, 'label', this.label);
   }
 
 
@@ -381,9 +405,10 @@ export class GroupResource extends Resource {
       generateAmount: 1,
       costs: [],
       timeToBuildMs: 0,
+      enabled: true
     });
 
-    this._groupResources = defination.groupResources;
+    this.groupResources = defination.groupResources;
 
     // Re-calculate when one of the amounts changes
     for (let i = 0; i < this._groupResources.length; i++) {
@@ -407,6 +432,19 @@ export class GroupResource extends Resource {
 
   set groupResources(value: { resource: Resource, multiplier: number }[]) {
     this._groupResources = value;
+
+    // Show details of how this resource is composed
+    let displayString = `<p>${this.label} derived from:</p>`;
+    displayString += "<ul>"
+    for (let i = 0; i < this._groupResources.length; i++) {
+      const groupResource = this._groupResources[i];
+      if (groupResource.resource.enabled)
+        displayString += `<li>1 ${groupResource.resource.label} -> ${groupResource.multiplier} ${this.label}</li>`
+    }
+    displayString += "</ul>"
+    console.log(this.name);
+
+    UI_displayText(this.name, 'composition-details', displayString);
   }
 
   get lastAccessedResource(): number {
@@ -425,7 +463,9 @@ export class GroupResource extends Resource {
 
     let run = true;
     let i = firstResouceToCheck;
-    while (run) {
+
+    while (amountToDeduct > 0) {
+      console.log(amountToDeduct);
 
       if (i >= this.groupResources.length) {
         i = 0;
@@ -434,10 +474,16 @@ export class GroupResource extends Resource {
       const resourceOf = this.groupResources[i];
 
       if (resourceOf.resource.amount * resourceOf.multiplier >= amountToDeduct) {
-        this.lastAccessedResource = i;
+        console.log(`Deducting ${amountToDeduct / resourceOf.multiplier} from ${resourceOf.resource.label}`);
         resourceOf.resource.performDeduction(amountToDeduct / resourceOf.multiplier);
-        run = false;
+        amountToDeduct -= amountToDeduct;
+      } else {
+        console.log(`Deducting ${resourceOf.resource.amount} from ${resourceOf.resource.label}`);
+        amountToDeduct -= resourceOf.resource.amount * resourceOf.multiplier;
+        resourceOf.resource.performDeduction(resourceOf.resource.amount);
       }
+
+      this.lastAccessedResource = i;
       i++;
     }
 

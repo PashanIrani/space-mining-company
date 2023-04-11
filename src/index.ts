@@ -2,7 +2,7 @@ import { Resource, GroupResource, AllResourceDefination } from "./resource"
 import { Time } from './time'
 import './styles/index.scss';
 import { PacingManger } from "./pacingManager";
-import { Store } from "./store";
+import { Store, StoreItem } from "./store";
 import { SaveSystem, beginSaving } from "./saveSystem";
 
 const DEV = true;
@@ -13,8 +13,21 @@ const savedTimeData = SAVE_ENABLED ? SaveSystem.loadTime() : null;
 if (savedTimeData) {
   Time.setInitTime(savedTimeData.minute, savedTimeData.hour, savedTimeData.day, savedTimeData.month, savedTimeData.year);
 } else {
-  Time.setInitTime(0, 0, 0, 1, 0);
+  const currentDate = new Date();
+
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth() + 1; // getMonth() returns 0-based index, so add 1
+  const currentDay = currentDate.getDate();
+  const currentHour = currentDate.getHours();
+  const currentMinute = currentDate.getMinutes();
+
+  SaveSystem.saveNewGameDate(currentMinute, currentHour, currentDay, currentMonth, currentYear);
+  Time.setInitTime(currentMinute, currentHour, currentDay, currentMonth, currentYear);
 }
+
+let newGameDate = SaveSystem.loadNewGameDate();
+Time.setNewGameTime(newGameDate.minute, newGameDate.hour, newGameDate.day, newGameDate.month, newGameDate.year);
+
 
 const labor = new Resource({
   name: 'labor',
@@ -25,45 +38,50 @@ const labor = new Resource({
   costs: [],
   timeToBuildMs: 0,
   holdToGenerateAmount: 0,
-  timeCost: 1
+  timeCost: 1,
+  enabled: true
 });
 
 const coffee = new Resource({
   name: 'coffee',
-  label: 'coffee',
+  label: 'Coffee',
   amount: 0,
   generateAmount: 1,
   capacity: 100,
   costs: [{ resource: 'labor', amount: 1 }, { resource: 'funds', amount: 2 }],
   timeToBuildMs: 0,
   holdToGenerateAmount: 0,
-  timeCost: 1
+  timeCost: 1,
+  enabled: false,
 });
 
 const energyGroup = new GroupResource({
   name: 'energyGroup',
   label: 'Energy',
-  groupResources: [{ resource: labor, multiplier: 1 }, { resource: coffee, multiplier: 10 }]
+  groupResources: [{ resource: labor, multiplier: 1 }, { resource: coffee, multiplier: 15 }]
 });
 
 const funds = new Resource({
   name: 'funds',
-  label: 'funds',
+  label: 'Funds',
   amount: 0,
   generateAmount: 1,
   capacity: 1000,
   costs: [{ resource: 'energyGroup', amount: 10 }],
   timeToBuildMs: 1000,
+  enabled: false,
 });
 
 
 export const ALL_RESOURCES: AllResourceDefination = { labor, funds, coffee, energyGroup };
 
+const pm = new PacingManger(ALL_RESOURCES, SAVE_ENABLED);
+
 const store = new Store({
   'profit1': {
     displayName: 'Capital Boost',
     displayDescription: "Doubles the amount of [funds] generated.",
-    costs: [{ resource: 'funds', amount: 10 }, { resource: 'labor', amount: 25 }],
+    costs: [{ resource: 'funds', amount: 10 }, { resource: 'energyGroup', amount: 25 }],
     onPurchase: () => {
       funds.generateAmount *= 2;
     },
@@ -74,7 +92,7 @@ const store = new Store({
   'profit2': {
     displayName: 'Capital Boost (2)',
     displayDescription: "Doubles the amount of [funds] generated.",
-    costs: [{ resource: 'funds', amount: 20 }, { resource: 'labor', amount: 50 }],
+    costs: [{ resource: 'funds', amount: 20 }, { resource: 'energyGroup', amount: 50 }],
     onPurchase: () => {
       funds.generateAmount *= 2;
     },
@@ -82,32 +100,10 @@ const store = new Store({
     dependsOn: 'profit1',
     level: 2,
   },
-  'profit3': {
-    displayName: 'Capital Boost (3)',
-    displayDescription: "Doubles the amount of [funds] generated.",
-    costs: [{ resource: 'funds', amount: 40 }, { resource: 'labor', amount: 100 }],
-    onPurchase: () => {
-      funds.generateAmount *= 2;
-    },
-    purchased: false,
-    dependsOn: 'profit2',
-    level: 3,
-  },
-  'profit4': {
-    displayName: 'Capital Boost (4)',
-    displayDescription: "Doubles the amount of [funds] generated.",
-    costs: [{ resource: 'funds', amount: 80 }, { resource: 'labor', amount: 200 }],
-    onPurchase: () => {
-      funds.generateAmount *= 2;
-    },
-    purchased: false,
-    dependsOn: 'profit3',
-    level: 4,
-  },
   'energy-enableHoldGeneration': {
     displayName: 'Anti-Carpal Tunnel Cream',
     displayDescription: "Enables generation button to be held down. (10 clicks/sec)",
-    costs: [{ resource: 'funds', amount: 9.99 }, { resource: 'labor', amount: 100 }],
+    costs: [{ resource: 'funds', amount: 10 }, { resource: 'energyGroup', amount: 100 }],
     onPurchase: () => {
       for (const key in ALL_RESOURCES) {
         let resource = ALL_RESOURCES[key];
@@ -117,20 +113,30 @@ const store = new Store({
     purchased: false,
     dependsOn: null,
   },
-  'energy-increaseGenerationAmount': {
-    displayName: 'Motivational Speech',
-    displayDescription: "Generate twice as much [Energy].",
-    costs: [{ resource: 'funds', amount: 100 }, { resource: 'labor', amount: 100 }],
+  'enableStats': {
+    displayName: 'System Update',
+    displayDescription: "Updates OS to show system stats.",
+    costs: [{ resource: 'funds', amount: 1 }, { resource: 'energyGroup', amount: 1 }],
     onPurchase: () => {
-      labor.generateAmount *= 2;
+      pm.showWindow('stats');
     },
     purchased: false,
-    dependsOn: 'energy-enableHoldGeneration',
+    dependsOn: null,
   },
+  'enableCoffee': {
+    displayName: 'Coffee Machine',
+    displayDescription: "Purchase a coffee machine. Enables generation of [coffee].",
+    costs: [{ resource: 'funds', amount: 1 }, { resource: 'energyGroup', amount: 1 }],
+    onPurchase: () => {
+      coffee.enabled = true;
+      pm.showWindow(coffee.name);
+    },
+    purchased: false,
+    dependsOn: null,
+  }
 });
 
 
-const pm = new PacingManger(ALL_RESOURCES, SAVE_ENABLED);
 
 if (SAVE_ENABLED) {
   SaveSystem.loadResources(ALL_RESOURCES);
@@ -145,8 +151,6 @@ for (const key in ALL_RESOURCES) {
   let resource = ALL_RESOURCES[key];
   resource.init();
   resource.onAmountUpdate(() => {
-    console.log(`${key} redraw`);
-
     Store.reDraw();
     pm.check();
   })

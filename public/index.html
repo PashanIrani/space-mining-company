@@ -41,12 +41,14 @@
         <p>Welcome to Space Mining Company!</p>
         <fieldset class="no-background basic-border">
           <legend class="match-text">General Info</legend>
-          <p class="info-label">Date: <span id="time-formattedDate"></span></p>
-          <p class="info-label">Time: <span id="time-formattedTime"></span> (<span id="time-timeOfDayLabel"></span>)</p>
+          <p class="info-label">Time: <span class="time-formattedTime"></span> (<span
+              class="time-timeOfDayLabel"></span>)</p>
+          <p class="info-label">Date: <span class="time-formattedDate"></span></p>
+          <p class="info-label">Company Establised: <span class="time-established"></span></p>
         </fieldset>
         <fieldset class="no-background basic-border">
           <legend class="match-text">System Info</legend>
-          <p class="info-label"><span id="time-since-last-save"></span></p>
+          <p class="info-label"><span class="save-next"></span></p>
         </fieldset>
         <button onclick="clearLocalStorageAndReload()">Restart</button>
 
@@ -61,7 +63,7 @@
   <div class="row">
     <div id="energy-window" class="window">
       <div class="title-bar">
-        <div class="title-bar-text">Energy (<span id="energyGroup-amount"></span>)</div>
+        <div class="title-bar-text">Energy (<span class="energyGroup-amount"></span>)</div>
         <div class="title-bar-controls">
           <button aria-label="Minimize"></button>
           <button aria-label="Maximize"></button>
@@ -69,50 +71,62 @@
         </div>
       </div>
       <div class="window-body">
+        <p>Energy: <span class="energyGroup-amount"></span></p>
         <p>The lifeblood of progress, without it, all crumbles.</p>
-        <!-- LABOR -->
+        <div class="group-composition-details">
+          <div class="energyGroup-composition-details"></div>
+        </div>
+        <hr class="space-only">
         <fieldset class="resource no-background basic-border">
-          <p>Labor: <span id="labor-buildStatus"></span><span id="labor-amount"></span>/<span
-              id="labor-capacity"></span>
-          </p>
-          <div class="progress-bar-container"><span id="labor-progress-bar"></span></div>
+          <legend class="match-text">Source of Energy</legend>
+          <!-- LABOR -->
+          <div id="labor-window">
+            <h1>Labor</h1>
+            <p>Amount: <span class="labor-buildStatus"></span><span class="labor-amount"></span>/<span
+                class="labor-capacity"></span>
+            </p>
+            <p>Cost: <span class="labor-costs"></span></p>
+            <!-- <p>Advances Time by: <span class="labor-time-cost"></span> min</p> -->
+            <p><span></span></p>
+            <div class="progress-bar-container"><span class="labor-progress-bar"></span></div>
 
-          <div class="button-container">
-            <span class="rate-text">Rate: <span id="labor-rate"></span></span>
-            <div>
-              <button id="labor-generate-button">Generate Energy (<span id="labor-generate-amount"></span>)</button>
-              <p class="hold-button-text" id="labor-hold-amount"></p>
+            <div class="button-container">
+              <span class="rate-text">Rate: <span class="labor-rate"></span></span>
+              <div>
+                <button id="labor-generate-button">Generate <span class="labor-label"></span> (<span
+                    class="labor-generate-amount"></span>)</button>
+                <p class="hold-button-text labor-hold-amount"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- LABOR -->
+          <div id="coffee-window">
+            <hr>
+            <h1>Coffee</h1>
+            <p>Amount: <span class="coffee-buildStatus"></span><span class="coffee-amount"></span>/<span
+                class="coffee-capacity"></span>
+            </p>
+            <p>Cost: <span class="coffee-costs"></span></p>
+            <!-- <p>Advances Time by: <span class="labor-time-cost"></span> min</p> -->
+            <p><span></span></p>
+            <div class="progress-bar-container"><span class="coffee-progress-bar"></span></div>
+
+            <div class="button-container">
+              <span class="rate-text">Rate: <span class="coffee-rate"></span></span>
+              <div>
+                <button id="coffee-generate-button">Generate <span class="coffee-label"></span> (<span
+                    class="coffee-generate-amount"></span>)</button>
+                <p class="hold-button-text coffee-hold-amount"></p>
+              </div>
             </div>
           </div>
         </fieldset>
-
-        <!-- COFFEE -->
-        <fieldset class="resource no-background basic-border">
-          <p>Coffee: <span id="coffee-buildStatus"></span><span id="coffee-amount"></span>/<span
-              id="coffee-capacity"></span>
-          </p>
-          <p>
-            Cost: <span id="coffee-costs"></span>
-          </p>
-          <div class="progress-bar-container"><span id="coffee-progress-bar"></span></div>
-
-          <div class="button-container">
-            <span class="rate-text">Rate: <span id="coffee-rate"></span></span>
-            <div>
-
-            </div>
-            <div>
-              <button id="coffee-generate-button">Generate Energy (<span id="coffee-generate-amount"></span>)</button>
-              <p class="hold-button-text" id="coffee-hold-amount"></p>
-            </div>
-          </div>
-        </fieldset>
-
       </div>
 
 
       <div class="status-bar">
-        <p class="status-bar-field">Rate: <span id="energyGroup-rate"></span></p>
+        <p class="status-bar-field">Rate: <span class="energyGroup-rate"></span></p>
       </div>
     </div>
   </div>
@@ -130,20 +144,21 @@
       </div>
       <div class="window-body">
         <p>The backbone of business operations, essential for growth and stability.</p>
-        <p>Funds: <span id="funds-amount"></span>/<span id="funds-capacity"></span> <span id="funds-buildStatus"></span>
+        <p>Funds: <span class="funds-amount"></span>/<span class="funds-capacity"></span> <span
+            class="funds-buildStatus"></span>
         </p>
-        <p>Cost: <span id="funds-costs"></span></p>
+        <p>Cost: <span class="funds-costs"></span></p>
         <div class="button-container">
           <div></div>
           <div>
-            <button id="funds-generate-button">Generate Funds (<span id="funds-generate-amount"></span>)</button>
-            <p class="hold-button-text" id="funds-hold-amount"></p>
+            <button id="funds-generate-button">Generate Funds (<span class="funds-generate-amount"></span>)</button>
+            <p class="hold-button-text funds-hold-amount"></p>
           </div>
         </div>
 
       </div>
       <div class="status-bar">
-        <p class="status-bar-field">Rate: <span id="funds-rate"></span></p>
+        <p class="status-bar-field">Rate: <span class="funds-rate"></span></p>
       </div>
     </div>
   </div>

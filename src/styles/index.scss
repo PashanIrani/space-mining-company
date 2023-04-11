@@ -100,7 +100,26 @@ body {
   text-align: center;
 }
 
+.group-composition-details {
+  font-size: 12px;
+
+  ul {
+    padding-left: 10px;
+  }
+}
+
+hr.space-only {
+  opacity: 0;
+  margin: 15px;
+}
+
 fieldset {
+  h1 {
+    font-size: 13px;
+    margin: 0;
+    text-decoration: underline;
+  }
+
   &.no-background {
     background-color: unset;
   }
