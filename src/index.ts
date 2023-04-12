@@ -4,7 +4,7 @@ import './styles/index.scss';
 import { PacingManger } from "./pacingManager";
 import { Store, StoreItem } from "./store";
 import { SaveSystem, beginSaving } from "./saveSystem";
-import { UI_log } from "./ui";
+import { UI_log, doGlitchEffect, shakeScreen } from "./ui";
 
 const DEV = true;
 const SAVE_ENABLED = true;
@@ -95,8 +95,30 @@ export const ALL_RESOURCES: AllResourceDefination = { labor, funds, coffee, ener
 const pm = new PacingManger(ALL_RESOURCES, SAVE_ENABLED);
 
 const store = new Store({
+  'enableStats': {
+    displayName: 'System Update',
+    displayDescription: "Updates OS to show system stats.",
+    costs: [{ resource: 'energyGroup', amount: 15 }],
+    onPurchase: () => {
+      pm.showWindow('stats');
+      UI_log('The system has been updated, and you are now able to access information about it.');
+    },
+    purchased: false,
+    dependsOn: null,
+  },
+  'enable-hiring': {
+    displayName: 'Recruit Help',
+    displayDescription: "Will enable the ablity to hire.",
+    costs: [{ resource: 'energyGroup', amount: 500 }, { resource: 'funds', amount: 1000 }],
+    onPurchase: () => {
+      // TODO
+      UI_log("Recruitment program installed.");
+    },
+    purchased: false,
+    dependsOn: 'enableStats',
+  },
   'profit1': {
-    displayName: 'Capital Boost',
+    displayName: 'Funds Boost',
     displayDescription: "Doubles the amount of [funds] generated.",
     costs: [{ resource: 'funds', amount: 10 }, { resource: 'energyGroup', amount: 25 }],
     onPurchase: () => {
@@ -107,7 +129,7 @@ const store = new Store({
     level: 1,
   },
   'profit2': {
-    displayName: 'Capital Boost (2)',
+    displayName: 'Funds Boost (2)',
     displayDescription: "Doubles the amount of [funds] generated.",
     costs: [{ resource: 'funds', amount: 20 }, { resource: 'energyGroup', amount: 50 }],
     onPurchase: () => {
@@ -119,27 +141,57 @@ const store = new Store({
   },
   'energy-enableHoldGeneration': {
     displayName: 'Anti-Carpal Tunnel Cream',
-    displayDescription: "Enables generation button to be held down. (10 clicks/sec)",
+    displayDescription: "Allows for sustained holding of generation buttons. (4 clicks/sec)",
     costs: [{ resource: 'funds', amount: 10 }, { resource: 'energyGroup', amount: 100 }],
     onPurchase: () => {
       for (const key in ALL_RESOURCES) {
         let resource = ALL_RESOURCES[key];
-        resource.holdToGenerateAmount = 10;
+        resource.holdToGenerateAmount = 4;
       }
     },
     purchased: false,
     dependsOn: 'enableStats',
   },
-  'enableStats': {
-    displayName: 'System Update',
-    displayDescription: "Updates OS to show system stats.",
-    costs: [{ resource: 'energyGroup', amount: 15 }],
+  'energy-enableHoldGeneration2': {
+    displayName: 'Super Anti-Carpal Tunnel Cream',
+    displayDescription: "Doubles the effect. (4 -> 8 clicks/sec)",
+    costs: [{ resource: 'funds', amount: 500 }, { resource: 'energyGroup', amount: 250 }],
     onPurchase: () => {
-      pm.showWindow('stats');
-      UI_log('The system has been updated, and you are now able to access information about it.');
+      for (const key in ALL_RESOURCES) {
+        let resource = ALL_RESOURCES[key];
+        resource.holdToGenerateAmount = 4;
+      }
     },
     purchased: false,
-    dependsOn: null,
+    dependsOn: 'increase-labor-generationAmount',
+  },
+  'increase-labor-generationAmount': {
+    displayName: 'Amplify Labor',
+    displayDescription: "Doubles the amount of [labor] generated.",
+    costs: [{ resource: 'funds', amount: 100 }, { resource: 'energyGroup', amount: 100 }],
+    onPurchase: () => {
+      labor.generateAmount *= 2;
+    },
+    purchased: false,
+    dependsOn: 'enableStats',
+  }, 'increase-labor-generationAmount2': {
+    displayName: 'Amplify Labor (2)',
+    displayDescription: "Doubles the amount of [labor] generated.",
+    costs: [{ resource: 'funds', amount: 250 }, { resource: 'energyGroup', amount: 200 }],
+    onPurchase: () => {
+      labor.generateAmount *= 2;
+    },
+    purchased: false,
+    dependsOn: 'increase-labor-generationAmount',
+  }, 'increase-labor-generationAmount3': {
+    displayName: 'Amplify Labor (2)',
+    displayDescription: "Doubles the amount of [labor] generated.",
+    costs: [{ resource: 'funds', amount: 10 }, { resource: 'energyGroup', amount: 100 }],
+    onPurchase: () => {
+      labor.generateAmount *= 2;
+    },
+    purchased: false,
+    dependsOn: 'increase-labor-generationAmount2',
   },
   'enableCoffee': {
     displayName: 'Coffee Machine',
@@ -181,6 +233,33 @@ const store = new Store({
     },
     purchased: false,
     dependsOn: 'coffee-capacity2',
+  }, 'coffee-capacity4': {
+    displayName: 'Coffeeholic',
+    displayDescription: "Become a Coffeeholic. Increases capacity of [coffee] to 20.",
+    costs: [{ resource: 'energyGroup', amount: 250 }],
+    onPurchase: () => {
+      coffee.capacity = 20;
+    },
+    purchased: false,
+    dependsOn: 'coffee-capacity3',
+  }, 'coffee-capacity5': {
+    displayName: 'Java Junkie',
+    displayDescription: "Become a Java Junkie. Increases capacity of [coffee] to 50.",
+    costs: [{ resource: 'energyGroup', amount: 400 }],
+    onPurchase: () => {
+      coffee.capacity = 50;
+    },
+    purchased: false,
+    dependsOn: 'coffee-capacity4',
+  }, 'coffee-capacity6': {
+    displayName: 'Coffee Pot',
+    displayDescription: "Become a walking, talking coffee pot. Increases capacity of [coffee] to 100.",
+    costs: [{ resource: 'energyGroup', amount: 850 }],
+    onPurchase: () => {
+      coffee.capacity = 100;
+    },
+    purchased: false,
+    dependsOn: 'coffee-capacity5',
   }
 });
 
@@ -203,6 +282,9 @@ for (const key in ALL_RESOURCES) {
     pm.check();
   })
 }
+
+shakeScreen(1);
+
 
 beginSaving();
 

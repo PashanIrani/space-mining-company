@@ -23,7 +23,7 @@ interface ResourceData {
   }
 }
 
-const SAVE_FREQUENCY = 1000;
+const SAVE_FREQUENCY = 1000 * 10;
 
 export function beginSaving() {
 
@@ -84,8 +84,6 @@ export class SaveSystem {
 
     UI_log(`Company Established: ${Time.getFormatedDate(day, month, year)} @${Time.getFormatedTime(hour, minute)}`);
     localStorage.setItem(INIT_TIME, JSON.stringify(timeData));
-    // console.log('hmmm', JSON.stringify(timeData));
-
   }
 
   static loadNewGameDate() {

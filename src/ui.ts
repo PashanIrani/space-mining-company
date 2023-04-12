@@ -39,6 +39,8 @@ export function UI_showWindow(name: string) {
     element.style.opacity = '1';
     element.style.position = 'static';
   }
+
+  shakeScreen();
 }
 // Hides HTML element with id of `name`-window
 export function UI_hideWindow(name: string) {
@@ -62,8 +64,14 @@ export function UI_drawStore(storeItems: StoreDefination) {
     if (storeItems[key].purchased) continue;
     if (storeItems[key].dependsOn && !storeItems[storeItems[key].dependsOn]?.purchased) continue; // if dependsOn has not been purchased, skip
 
+    let cantAfford = !Resource_canAffordGeneration(storeItems[key].costs);
+
     const itemContainer = document.createElement('div');
     itemContainer.classList.add('store-item-container');
+    if (cantAfford)
+      itemContainer.classList.add('disabled');
+
+
 
     const itemInfoContainer = document.createElement('div');
     itemInfoContainer.classList.add('store-item-info');
@@ -87,7 +95,7 @@ export function UI_drawStore(storeItems: StoreDefination) {
     const buttonElement = document.createElement('button');
     buttonElement.id = `${key}-generate-button`;
     buttonElement.textContent = 'Buy';
-    buttonElement.disabled = !Resource_canAffordGeneration(storeItems[key].costs);
+    buttonElement.disabled = cantAfford;
 
     buttonElement.addEventListener('click', () => Store.buyItem(key));
 
@@ -101,7 +109,9 @@ export function UI_drawStore(storeItems: StoreDefination) {
 }
 
 
-export function doGlitchEffect() {
+export function doGlitchEffect(count: number) {
+
+  if (count <= 0) return;
   const elements = document.querySelectorAll('*:not(body):not(html)');
   const randomIndex = Math.floor(Math.random() * elements.length);
   const element = elements[randomIndex];
@@ -112,12 +122,23 @@ export function doGlitchEffect() {
     element.classList.remove('glitch-fx');
   }, randomTime);
 
-  const randomInterval = randomIntFromInterval(10, 15000)
-  setTimeout(doGlitchEffect, randomInterval);
+  const randomInterval = randomIntFromInterval(10, 150)
+
+  setTimeout(() => {
+    doGlitchEffect(count - 1)
+  }, randomInterval);
 }
 export function UI_log(text: string) {
   let logScreenContainer = document.getElementById("log-screen-container");
   document.getElementById("log-screen").innerHTML += `<br>${Time.getCurrentTimestamp()}${text}`;
 
   logScreenContainer.scrollTop = logScreenContainer.scrollHeight;
+}
+
+export function shakeScreen(times = 5) {
+  for (let i = 0; i < 200; i++) {
+    doGlitchEffect(times);
+    doGlitchEffect(times);
+    doGlitchEffect(times);
+  }
 }
