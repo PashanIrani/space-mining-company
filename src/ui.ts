@@ -2,6 +2,7 @@ import { Cost_getCostDisplayString } from "./cost";
 import { formatNumberString, randomIntFromInterval } from "./helpers";
 import { Resource_canAffordGeneration } from "./resource";
 import { Store, StoreDefination } from "./store";
+import { Time } from "./time";
 
 export function UI_displayValue(name: string, valueType: string, value: number, decimals: number = 0, charLength: number = -1) {
   if (value !== 0 && !value)
@@ -24,7 +25,6 @@ export function UI_displayText(name: string, valueType: string, text: string) {
 
 export function UI_updateProgressBar(name: string, amount: number = 0, capacity: number = 1) {
   const elements = document.querySelectorAll(`.${name}-progress-bar`);
-  console.log(elements, `${name}-progress-bar`);
 
   elements.forEach(element => {
     element.innerHTML = `<progress max="${capacity}" value="${amount}"></progress>`;
@@ -114,4 +114,10 @@ export function doGlitchEffect() {
 
   const randomInterval = randomIntFromInterval(10, 15000)
   setTimeout(doGlitchEffect, randomInterval);
+}
+export function UI_log(text: string) {
+  let logScreenContainer = document.getElementById("log-screen-container");
+  document.getElementById("log-screen").innerHTML += `<br>${Time.getCurrentTimestamp()}${text}`;
+
+  logScreenContainer.scrollTop = logScreenContainer.scrollHeight;
 }

@@ -1,4 +1,4 @@
-import { UI_displayValue, UI_displayText, UI_updateProgressBar } from "./ui";
+import { UI_displayValue, UI_displayText, UI_updateProgressBar, UI_log } from "./ui";
 import { Cost, Cost_getCostDisplayString } from "./cost";
 import { formatNumberString } from "./helpers";
 import { Time } from "./time";
@@ -308,14 +308,10 @@ export class Resource {
     return true;
   }
 
-  get updatedFromSave(): boolean {
-    return this._updatedFromSave;
-  }
-
   //! will only be called once, which will be set if resource's data was loaded from a save. This is to ensure any inprogress builds will continue again
-  set updatedFromSave(value: boolean) {
+  public updatedFromSave(value: boolean, offlineProgressionMs: number) {
     this._updatedFromSave = value;
-
+    this.advanceBuildQueue(offlineProgressionMs);
     if (value) {
       if (this.buildStatus > 0) {
         this.initiateBuild();
@@ -390,6 +386,32 @@ export class Resource {
     this.amount -= amountToDeduct;
     this._afterDeduction();
   }
+
+  advanceBuildQueue(totalDurationOffline: number) {
+    let numOfCompletedBuild = totalDurationOffline / this.timeToBuildMs;
+    let fullyCompleted = Math.floor(numOfCompletedBuild);
+    let partialBuildPercentage = numOfCompletedBuild - fullyCompleted;
+
+    // complete first build partial
+
+    while (numOfCompletedBuild > 0 && this.buildQueue.length > 0) {
+      let percentageNeededForBuild = 1 - this.buildStatus;
+
+      console.log(percentageNeededForBuild, numOfCompletedBuild);
+
+      // If needed is more than build offline
+      if (percentageNeededForBuild > numOfCompletedBuild) {
+        this.buildStatus += numOfCompletedBuild; // give it remained
+
+        numOfCompletedBuild = 0; // end
+      } else {
+        this.build(this.buildQueue.shift());
+        this.buildStatus = 0;
+        numOfCompletedBuild -= percentageNeededForBuild;
+      }
+
+    }
+  }
 }
 
 export class GroupResource extends Resource {
@@ -433,18 +455,7 @@ export class GroupResource extends Resource {
   set groupResources(value: { resource: Resource, multiplier: number }[]) {
     this._groupResources = value;
 
-    // Show details of how this resource is composed
-    let displayString = `<p>${this.label} derived from:</p>`;
-    displayString += "<ul>"
-    for (let i = 0; i < this._groupResources.length; i++) {
-      const groupResource = this._groupResources[i];
-      if (groupResource.resource.enabled)
-        displayString += `<li>1 ${groupResource.resource.label} -> ${groupResource.multiplier} ${this.label}</li>`
-    }
-    displayString += "</ul>"
-    console.log(this.name);
-
-    UI_displayText(this.name, 'composition-details', displayString);
+    this.drawCompositionDetails();
   }
 
   get lastAccessedResource(): number {
@@ -455,6 +466,19 @@ export class GroupResource extends Resource {
     this._lastAccessedResource = value;
   }
 
+  drawCompositionDetails() {
+    // Show details of how this resource is composed
+    let displayString = `<p>${this.label} derived from:</p>`;
+    displayString += "<ul>"
+    for (let i = 0; i < this._groupResources.length; i++) {
+      const groupResource = this._groupResources[i];
+      if (groupResource.resource.enabled)
+        displayString += `<li>1 ${groupResource.resource.label} -> ${groupResource.multiplier} ${this.label}</li>`
+    }
+    displayString += "</ul>"
+
+    UI_displayText(this.name, 'composition-details', displayString);
+  }
   performDeduction(amountToDeduct: number) {
     // Get index of which resource to deduct from next
     let firstResouceToCheck = this.lastAccessedResource + 1 <= this.groupResources.length - 1
@@ -465,8 +489,6 @@ export class GroupResource extends Resource {
     let i = firstResouceToCheck;
 
     while (amountToDeduct > 0) {
-      console.log(amountToDeduct);
-
       if (i >= this.groupResources.length) {
         i = 0;
       }
@@ -474,11 +496,9 @@ export class GroupResource extends Resource {
       const resourceOf = this.groupResources[i];
 
       if (resourceOf.resource.amount * resourceOf.multiplier >= amountToDeduct) {
-        console.log(`Deducting ${amountToDeduct / resourceOf.multiplier} from ${resourceOf.resource.label}`);
         resourceOf.resource.performDeduction(amountToDeduct / resourceOf.multiplier);
         amountToDeduct -= amountToDeduct;
       } else {
-        console.log(`Deducting ${resourceOf.resource.amount} from ${resourceOf.resource.label}`);
         amountToDeduct -= resourceOf.resource.amount * resourceOf.multiplier;
         resourceOf.resource.performDeduction(resourceOf.resource.amount);
       }

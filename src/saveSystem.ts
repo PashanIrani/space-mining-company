@@ -1,13 +1,15 @@
 import { ALL_RESOURCES } from ".";
 import { AllResourceDefination, Resource } from "./resource";
 import { Store } from "./store";
-import { Time } from "./time";
-import { UI_displayText } from "./ui";
+import { TIME_TICK_SPEED, Time } from "./time";
+import { UI_displayText, UI_log } from "./ui";
 
 const RESOURCES = "resources";
 const STORE_ITEMS = "storeItems";
 const TIME = "timeData";
 const INIT_TIME = "initTimeData";
+const LOGS = "logs";
+const LAST_SAVE_TIME = "last_save_time";
 
 interface ResourceData {
   [key: string]: {
@@ -21,7 +23,7 @@ interface ResourceData {
   }
 }
 
-const SAVE_FREQUENCY = 1000 * 10000;
+const SAVE_FREQUENCY = 1000;
 
 export function beginSaving() {
 
@@ -48,7 +50,14 @@ export class SaveSystem {
     this.saveResources();
     this.saveTime();
     this.saveStoreItems();
+    this.saveLog();
+    this.markSave();
     this.lastSaveTime = new Date();
+  }
+
+  // marks last saved time 
+  static markSave() {
+    localStorage.setItem(LAST_SAVE_TIME, new Date().getTime() + "");
   }
 
   static saveTime() {
@@ -59,6 +68,7 @@ export class SaveSystem {
       month: Time.month,
       year: Time.year
     }
+    console.log(JSON.stringify(timeData));
 
     localStorage.setItem(TIME, JSON.stringify(timeData));
   }
@@ -72,7 +82,10 @@ export class SaveSystem {
       year: year
     }
 
+    UI_log(`Company Established: ${Time.getFormatedDate(day, month, year)} @${Time.getFormatedTime(hour, minute)}`);
     localStorage.setItem(INIT_TIME, JSON.stringify(timeData));
+    // console.log('hmmm', JSON.stringify(timeData));
+
   }
 
   static loadNewGameDate() {
@@ -85,6 +98,8 @@ export class SaveSystem {
   static loadTime() {
     let timeData = localStorage.getItem(TIME);
     if (timeData === null) return null;
+
+
 
     return JSON.parse(timeData);
   }
@@ -134,6 +149,8 @@ export class SaveSystem {
   }
 
   static loadResources(resources: AllResourceDefination) {
+
+
     let resourcesDataString = localStorage.getItem(RESOURCES);
 
     if (resourcesDataString == null) return;
@@ -149,7 +166,34 @@ export class SaveSystem {
       resource.holdToGenerateAmount = resourcesData[key].holdToGenerateAmount;
       resource.buildQueue = resourcesData[key].buildQueue;
       resource.buildStatus = resourcesData[key].buildStatus;
-      resource.updatedFromSave = true;
+      resource.updatedFromSave(true, this.getLastOfflineTime());
     }
+  }
+
+  static saveLog() {
+    localStorage.setItem(LOGS, document.getElementById('log-screen').innerHTML);
+  }
+
+  static getLastOfflineTime(): number {
+    let lastTime: any = localStorage.getItem(LAST_SAVE_TIME);
+
+    if (lastTime == null) return null;
+
+    let currentTime = new Date().getTime();
+    let totalDurationOffline = currentTime - Number(lastTime);
+
+    return totalDurationOffline;
+  }
+  static loadLog(): boolean {
+    let logScreenContainer = document.getElementById("log-screen-container");
+    let savedLog = localStorage.getItem(LOGS);
+
+    let set = false;
+    if (savedLog) {
+      document.getElementById("log-screen").innerHTML = savedLog;
+      set = true;
+    }
+    logScreenContainer.scrollTop = logScreenContainer.scrollHeight;
+    return set;
   }
 }

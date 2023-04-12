@@ -6,7 +6,7 @@ const MAX_MINUTE = 59;
 const MAX_HOUR = 23;
 const MAX_MONTH = 12;
 
-const TIME_TICK_SPEED = 1000 * 60;
+export const TIME_TICK_SPEED = 1000 * 5; // 8 Mins per day
 export class Time {
   static _minute: number;
   static _hour: number;
@@ -25,6 +25,8 @@ export class Time {
   }
 
   static setInitTime(minute: number = 0, hour: number = 0, day: number = 1, month: number = 1, year: number = 0) {
+    console.log(minute);
+
     this.minute = minute;
     this.hour = hour;
     this.day = day;
@@ -124,8 +126,6 @@ export class Time {
       formattedHour = 12;
     }
 
-    const formattedMins = minute < 10 ? `0${minute}` : minute;
-
     return `${formattedHour}:${formatNumberString(minute, 0, 2)} ${ampm}`;
   }
 
@@ -184,6 +184,13 @@ export class Time {
     }
   }
 
+  static getCurrentTimestamp() {
+    return this.year === undefined ? '' : `[${this.year}-${this.month}-${this.day} ${this.getFormatedTime()}] `;
+  }
+
+  static advanceMinutes(numOfTimeTicks: number) {
+    this.minute += numOfTimeTicks;
+  }
 }
 
 

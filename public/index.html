@@ -26,11 +26,12 @@
     </div>
   </div> -->
 
+
   <!-- WELCOME -->
   <div class="row">
-    <div id="stats-window" class="window">
+    <div class="window">
       <div class="title-bar">
-        <div class="title-bar-text">Welcome!</div>
+        <div class="title-bar-text">Command Prompt</div>
         <div class="title-bar-controls">
           <button aria-label="Minimize"></button>
           <button aria-label="Maximize"></button>
@@ -38,7 +39,25 @@
         </div>
       </div>
       <div class="window-body">
-        <p>Welcome to Space Mining Company!</p>
+        <pre id="log-screen-container">C:&#92;WINDOWS&#92;SYSTEM32> smc.exe --show-logs
+          <div id="log-screen"></div>
+        </pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- WELCOME -->
+  <div class="row">
+    <div id="stats-window" class="window">
+      <div class="title-bar">
+        <div class="title-bar-text">System Information</div>
+        <div class="title-bar-controls">
+          <button aria-label="Minimize"></button>
+          <button aria-label="Maximize"></button>
+          <button aria-label="Close"></button>
+        </div>
+      </div>
+      <div class="window-body">
         <fieldset class="no-background basic-border">
           <legend class="match-text">General Info</legend>
           <p class="info-label">Time: <span class="time-formattedTime"></span> (<span
@@ -46,15 +65,10 @@
           <p class="info-label">Date: <span class="time-formattedDate"></span></p>
           <p class="info-label">Company Establised: <span class="time-established"></span></p>
         </fieldset>
-        <fieldset class="no-background basic-border">
-          <legend class="match-text">System Info</legend>
-          <p class="info-label"><span class="save-next"></span></p>
-        </fieldset>
         <button onclick="clearLocalStorageAndReload()">Restart</button>
 
       </div>
     </div>
-
   </div>
 
 
@@ -82,8 +96,8 @@
           <!-- LABOR -->
           <div id="labor-window">
             <h1>Labor</h1>
-            <p>Amount: <span class="labor-buildStatus"></span><span class="labor-amount"></span>/<span
-                class="labor-capacity"></span>
+            <p>Amount: <span class="labor-amount"></span>/<span class="labor-capacity"></span> <span
+                class="labor-buildStatus"></span>
             </p>
             <p>Cost: <span class="labor-costs"></span></p>
             <!-- <p>Advances Time by: <span class="labor-time-cost"></span> min</p> -->
@@ -104,8 +118,8 @@
           <div id="coffee-window">
             <hr>
             <h1>Coffee</h1>
-            <p>Amount: <span class="coffee-buildStatus"></span><span class="coffee-amount"></span>/<span
-                class="coffee-capacity"></span>
+            <p>Amount: <span class="coffee-amount"></span>/<span class="coffee-capacity"></span> <span
+                class="coffee-buildStatus"></span>
             </p>
             <p>Cost: <span class="coffee-costs"></span></p>
             <!-- <p>Advances Time by: <span class="labor-time-cost"></span> min</p> -->

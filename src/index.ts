@@ -1,15 +1,21 @@
 import { Resource, GroupResource, AllResourceDefination } from "./resource"
-import { Time } from './time'
+import { TIME_TICK_SPEED, Time } from './time'
 import './styles/index.scss';
 import { PacingManger } from "./pacingManager";
 import { Store, StoreItem } from "./store";
 import { SaveSystem, beginSaving } from "./saveSystem";
+import { UI_log } from "./ui";
 
 const DEV = true;
 const SAVE_ENABLED = true;
 
 const savedTimeData = SAVE_ENABLED ? SaveSystem.loadTime() : null;
 
+if (!SaveSystem.loadLog()) {
+  UI_log("Welcome to Space Mining Company!");
+}
+
+// INIT TIME
 if (savedTimeData) {
   Time.setInitTime(savedTimeData.minute, savedTimeData.hour, savedTimeData.day, savedTimeData.month, savedTimeData.year);
 } else {
@@ -25,9 +31,19 @@ if (savedTimeData) {
   Time.setInitTime(currentMinute, currentHour, currentDay, currentMonth, currentYear);
 }
 
+// INIT new game time
 let newGameDate = SaveSystem.loadNewGameDate();
+// if (newGameDate)
 Time.setNewGameTime(newGameDate.minute, newGameDate.hour, newGameDate.day, newGameDate.month, newGameDate.year);
 
+// Advance offline time
+let lastOfflineTime = SaveSystem.getLastOfflineTime();
+
+if (lastOfflineTime !== null) {
+  let numOfTimeTicks = lastOfflineTime / TIME_TICK_SPEED;
+  Time.advanceMinutes(numOfTimeTicks);
+}
+//----------
 
 const labor = new Resource({
   name: 'labor',
@@ -36,7 +52,7 @@ const labor = new Resource({
   generateAmount: 1,
   capacity: 100,
   costs: [],
-  timeToBuildMs: 0,
+  timeToBuildMs: 100,
   holdToGenerateAmount: 0,
   timeCost: 1,
   enabled: true
@@ -47,11 +63,11 @@ const coffee = new Resource({
   label: 'Coffee',
   amount: 0,
   generateAmount: 1,
-  capacity: 100,
+  capacity: 1,
   costs: [{ resource: 'labor', amount: 1 }, { resource: 'funds', amount: 2 }],
-  timeToBuildMs: 0,
+  timeToBuildMs: 5000,
   holdToGenerateAmount: 0,
-  timeCost: 1,
+  timeCost: 5,
   enabled: false,
 });
 
@@ -68,8 +84,9 @@ const funds = new Resource({
   generateAmount: 1,
   capacity: 1000,
   costs: [{ resource: 'energyGroup', amount: 10 }],
-  timeToBuildMs: 1000,
+  timeToBuildMs: 500,
   enabled: false,
+  timeCost: 10,
 });
 
 
@@ -111,14 +128,15 @@ const store = new Store({
       }
     },
     purchased: false,
-    dependsOn: null,
+    dependsOn: 'enableStats',
   },
   'enableStats': {
     displayName: 'System Update',
     displayDescription: "Updates OS to show system stats.",
-    costs: [{ resource: 'funds', amount: 1 }, { resource: 'energyGroup', amount: 1 }],
+    costs: [{ resource: 'energyGroup', amount: 15 }],
     onPurchase: () => {
       pm.showWindow('stats');
+      UI_log('The system has been updated, and you are now able to access information about it.');
     },
     purchased: false,
     dependsOn: null,
@@ -126,13 +144,43 @@ const store = new Store({
   'enableCoffee': {
     displayName: 'Coffee Machine',
     displayDescription: "Purchase a coffee machine. Enables generation of [coffee].",
-    costs: [{ resource: 'funds', amount: 1 }, { resource: 'energyGroup', amount: 1 }],
+    costs: [{ resource: 'funds', amount: 50 }, { resource: 'energyGroup', amount: 100 }],
     onPurchase: () => {
       coffee.enabled = true;
       pm.showWindow(coffee.name);
+      energyGroup.drawCompositionDetails();
+      UI_log("Coffee Machine Purchased!");
     },
     purchased: false,
     dependsOn: null,
+  },
+  'coffee-capacity1': {
+    displayName: 'Coffee Enjoyer',
+    displayDescription: "Become a coffee enjoyer. Increases capacity of [coffee] to 2.",
+    costs: [{ resource: 'energyGroup', amount: 115 }],
+    onPurchase: () => {
+      coffee.capacity = 2;
+    },
+    purchased: false,
+    dependsOn: 'enableCoffee',
+  }, 'coffee-capacity2': {
+    displayName: 'Coffee Enthusiast',
+    displayDescription: "Become a coffee enthusiast. Increases capacity of [coffee] to 5.",
+    costs: [{ resource: 'energyGroup', amount: 130 }],
+    onPurchase: () => {
+      coffee.capacity = 5;
+    },
+    purchased: false,
+    dependsOn: 'coffee-capacity1',
+  }, 'coffee-capacity3': {
+    displayName: 'Coffee Addict',
+    displayDescription: "Become a coffee enthusiast. Increases capacity of [coffee] to 10.",
+    costs: [{ resource: 'energyGroup', amount: 175 }],
+    onPurchase: () => {
+      coffee.capacity = 10;
+    },
+    purchased: false,
+    dependsOn: 'coffee-capacity2',
   }
 });
 

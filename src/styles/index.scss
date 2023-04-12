@@ -55,9 +55,16 @@ body {
   transition: opacity 0.5s ease;
 }
 
-.window-body {
-  padding: 5px;
+pre {
+  width: 100%;
+
+  overflow-y: scroll;
+  overflow-x: scroll;
+  height: 150px;
+  max-height: 150px;
 }
+
+#log-screen {}
 
 .progress-bar-container {
   progress {
