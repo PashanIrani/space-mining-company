@@ -3,47 +3,27 @@ import { TIME_TICK_SPEED, Time } from './time'
 import './styles/index.scss';
 import { PacingManger } from "./pacingManager";
 import { Store, StoreItem } from "./store";
-import { SaveSystem, beginSaving } from "./saveSystem";
 import { UI_log, doGlitchEffect, shakeScreen } from "./ui";
 
 const DEV = true;
 const SAVE_ENABLED = true;
 
-const savedTimeData = SAVE_ENABLED ? SaveSystem.loadTime() : null;
 
-if (!SaveSystem.loadLog()) {
-  UI_log("Welcome to Space Mining Company!");
-}
+UI_log("Welcome to Space Mining Company!");
 
 // INIT TIME
-if (savedTimeData) {
-  Time.setInitTime(savedTimeData.minute, savedTimeData.hour, savedTimeData.day, savedTimeData.month, savedTimeData.year);
-} else {
-  const currentDate = new Date();
+const currentDate = new Date();
 
-  const currentYear = currentDate.getFullYear();
-  const currentMonth = currentDate.getMonth() + 1; // getMonth() returns 0-based index, so add 1
-  const currentDay = currentDate.getDate();
-  const currentHour = currentDate.getHours();
-  const currentMinute = currentDate.getMinutes();
+const currentYear = currentDate.getFullYear();
+const currentMonth = currentDate.getMonth() + 1; // getMonth() returns 0-based index, so add 1
+const currentDay = currentDate.getDate();
+const currentHour = currentDate.getHours();
+const currentMinute = currentDate.getMinutes();
 
-  SaveSystem.saveNewGameDate(currentMinute, currentHour, currentDay, currentMonth, currentYear);
-  Time.setInitTime(currentMinute, currentHour, currentDay, currentMonth, currentYear);
-}
+Time.setInitTime(currentMinute, currentHour, currentDay, currentMonth, currentYear, true);
+Time.setNewGameTime(currentMinute, currentHour, currentDay, currentMonth, currentYear);
 
-// INIT new game time
-let newGameDate = SaveSystem.loadNewGameDate();
-// if (newGameDate)
-Time.setNewGameTime(newGameDate.minute, newGameDate.hour, newGameDate.day, newGameDate.month, newGameDate.year);
 
-// Advance offline time
-let lastOfflineTime = SaveSystem.getLastOfflineTime();
-
-if (lastOfflineTime !== null) {
-  let numOfTimeTicks = lastOfflineTime / TIME_TICK_SPEED;
-  Time.advanceMinutes(numOfTimeTicks);
-}
-//----------
 
 const labor = new Resource({
   name: 'labor',
@@ -184,9 +164,9 @@ const store = new Store({
     purchased: false,
     dependsOn: 'increase-labor-generationAmount',
   }, 'increase-labor-generationAmount3': {
-    displayName: 'Amplify Labor (2)',
+    displayName: 'Amplify Labor (3)',
     displayDescription: "Doubles the amount of [labor] generated.",
-    costs: [{ resource: 'funds', amount: 10 }, { resource: 'energyGroup', amount: 100 }],
+    costs: [{ resource: 'funds', amount: 500 }, { resource: 'energyGroup', amount: 750 }],
     onPurchase: () => {
       labor.generateAmount *= 2;
     },
@@ -263,13 +243,6 @@ const store = new Store({
   }
 });
 
-
-
-if (SAVE_ENABLED) {
-  SaveSystem.loadResources(ALL_RESOURCES);
-  SaveSystem.loadStoreItems();
-}
-
 Store.reDraw();
 pm.check();
 
@@ -282,9 +255,4 @@ for (const key in ALL_RESOURCES) {
     pm.check();
   })
 }
-
-shakeScreen(1);
-
-
-beginSaving();
 

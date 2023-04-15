@@ -14,7 +14,7 @@ export function Cost_getCostDisplayString(costs: Cost[]) {
 
   for (let i = 0; i < costs.length; i++) {
     const cost = costs[i];
-    costDisplayText += `<span ${!Resource_canAffordGeneration([cost]) ? 'class="cost-cant-afford"' : ''}>${ALL_RESOURCES[cost.resource].label.charAt(0).toUpperCase() + ALL_RESOURCES[cost.resource].label.slice(1).toLowerCase()} (${cost.amount})</span>`
+    costDisplayText += `<span ${!Resource_canAffordGeneration([cost]) ? 'class="cost-cant-afford"' : ''}>${ALL_RESOURCES[cost.resource].label.charAt(0).toUpperCase() + ALL_RESOURCES[cost.resource].label.slice(1).toLowerCase()} (${ALL_RESOURCES[cost.resource].amount}/${cost.amount})</span>`
     if (i < costs.length - 1) {
       costDisplayText += ", ";
     }

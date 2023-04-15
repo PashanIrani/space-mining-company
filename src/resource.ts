@@ -71,8 +71,6 @@ export class Resource {
   private _timeCost: number;
   private _enabled: boolean;
 
-  private _updatedFromSave: boolean = false; // set this to true after loading values from a save. To trigger in-progress builds to finish
-
   public buildQueue: number[] = []; // keeps track of builds being queued and how much amount to generate, incase generateAmount changes while still in queue
   private onAmountUpdateCallbacks: Function[] = []; // holds functions that need to be called when amount is updated.
 
@@ -112,14 +110,18 @@ export class Resource {
       });
     }
   }
+
+  // Registers a callback that will be called when amount is updated
   onAmountUpdate(callbackFn: Function) {
     this.onAmountUpdateCallbacks.push(callbackFn);
   }
 
+  // Calculates Rate
   private initRateCalculation() {
     let prevValue = this.amount;
+
     setInterval(() => {
-      let rate = this.calculateRate(prevValue, this.amount);
+      let rate = this.amount - prevValue;
 
       let timeLeftText = null;
       if (rate < 0) {
@@ -134,11 +136,6 @@ export class Resource {
       UI_displayText(this.name, 'rate', `${rate > 0 ? '+' : ''}${rate}/s ${timeLeftText != null ? `(${timeLeftText})` : ''}`);
       prevValue = this.amount;
     }, 1000);
-  }
-
-
-  private calculateRate(prevValue: number, currentValue: number) {
-    return currentValue - prevValue;
   }
 
   // If generate button is held down, this method will generate clicks _holdToGenerateAmount time per sec
@@ -247,9 +244,6 @@ export class Resource {
 
   set holdToGenerateAmount(value: number) {
     this._holdToGenerateAmount = value;
-
-    // reset event listeners
-
     UI_displayText(this.name, 'hold-amount', value > 0 ? `Hold for +${value} clicks/sec` : '')
   }
 
@@ -308,17 +302,6 @@ export class Resource {
     return true;
   }
 
-  //! will only be called once, which will be set if resource's data was loaded from a save. This is to ensure any inprogress builds will continue again
-  public updatedFromSave(value: boolean, offlineProgressionMs: number) {
-    this._updatedFromSave = value;
-    this.advanceBuildQueue(offlineProgressionMs);
-    if (value) {
-      if (this.buildStatus > 0) {
-        this.initiateBuild();
-      }
-    }
-  }
-
   private getSumOfBuildQueue() {
     let sum = 0;
     for (let i = 0; i < this.buildQueue.length; i++) {
@@ -327,6 +310,7 @@ export class Resource {
     }
     return sum
   }
+
   private initiateBuild() {
     if (this.timeToBuildMs > 0) {
       const timePerPercent = this.timeToBuildMs / 100; // the frequency of build percentage update
@@ -375,6 +359,8 @@ export class Resource {
 
   //! Only run after it is fully okay to build after checks with canAffordGeneration() and ONLY after Resource_performCostTransaction()
   private build(amount: number = this.generateAmount) {
+    console.log('BUILD!', amount);
+
     this.amount += amount;
     this._afterNewGeneration(this.amount, amount);
 
@@ -385,32 +371,6 @@ export class Resource {
   performDeduction(amountToDeduct: number) {
     this.amount -= amountToDeduct;
     this._afterDeduction();
-  }
-
-  advanceBuildQueue(totalDurationOffline: number) {
-    let numOfCompletedBuild = totalDurationOffline / this.timeToBuildMs;
-    let fullyCompleted = Math.floor(numOfCompletedBuild);
-    let partialBuildPercentage = numOfCompletedBuild - fullyCompleted;
-
-    // complete first build partial
-
-    while (numOfCompletedBuild > 0 && this.buildQueue.length > 0) {
-      let percentageNeededForBuild = 1 - this.buildStatus;
-
-      console.log(percentageNeededForBuild, numOfCompletedBuild);
-
-      // If needed is more than build offline
-      if (percentageNeededForBuild > numOfCompletedBuild) {
-        this.buildStatus += numOfCompletedBuild; // give it remained
-
-        numOfCompletedBuild = 0; // end
-      } else {
-        this.build(this.buildQueue.shift());
-        this.buildStatus = 0;
-        numOfCompletedBuild -= percentageNeededForBuild;
-      }
-
-    }
   }
 }
 
@@ -436,6 +396,8 @@ export class GroupResource extends Resource {
     for (let i = 0; i < this._groupResources.length; i++) {
       this._groupResources[i].resource.onAmountUpdate(this.calculateTotalAmount.bind(this));
     }
+
+    this.calculateTotalAmount();
   }
 
   private calculateTotalAmount() {
@@ -474,11 +436,13 @@ export class GroupResource extends Resource {
       const groupResource = this._groupResources[i];
       if (groupResource.resource.enabled)
         displayString += `<li>1 ${groupResource.resource.label} -> ${groupResource.multiplier} ${this.label}</li>`
+      UI_displayText(this.name, `${groupResource.resource.name}-weight`, `${groupResource.multiplier} ${this.label}`)
     }
     displayString += "</ul>"
 
     UI_displayText(this.name, 'composition-details', displayString);
   }
+
   performDeduction(amountToDeduct: number) {
     // Get index of which resource to deduct from next
     let firstResouceToCheck = this.lastAccessedResource + 1 <= this.groupResources.length - 1
@@ -506,7 +470,5 @@ export class GroupResource extends Resource {
       this.lastAccessedResource = i;
       i++;
     }
-
-
   }
 }

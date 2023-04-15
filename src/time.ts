@@ -17,14 +17,9 @@ export class Time {
   static newGameTime: { minute: number, hour: number, day: number, month: number, year: number };
 
   static setNewGameTime(minute: number = 0, hour: number = 0, day: number = 1, month: number = 1, year: number = 0) {
-    this.newGameTime = {
-      minute, hour, day, month, year
-    }
-
-    UI_displayText('time', 'established', `${this.getFormatedDate(this.newGameTime.day, this.newGameTime.month, this.newGameTime.year)} @ ${this.getFormatedTime(this.newGameTime.hour, this.newGameTime.minute)}`)
   }
 
-  static setInitTime(minute: number = 0, hour: number = 0, day: number = 1, month: number = 1, year: number = 0) {
+  static setInitTime(minute: number = 0, hour: number = 0, day: number = 1, month: number = 1, year: number = 0, newGame: boolean = false) {
     console.log(minute);
 
     this.minute = minute;
@@ -32,6 +27,14 @@ export class Time {
     this.day = day;
     this.month = month;
     this.year = year;
+
+    if (newGame) {
+      this.newGameTime = {
+        minute, hour, day, month, year
+      }
+
+      UI_displayText('time', 'established', `${this.getFormatedDate(this.newGameTime.day, this.newGameTime.month, this.newGameTime.year)} @ ${this.getFormatedTime(this.newGameTime.hour, this.newGameTime.minute)}`)
+    }
 
     this.startTime();
 
@@ -186,10 +189,6 @@ export class Time {
 
   static getCurrentTimestamp() {
     return this.year === undefined ? '' : `[${this.year}-${this.month}-${this.day} ${this.getFormatedTime()}] `;
-  }
-
-  static advanceMinutes(numOfTimeTicks: number) {
-    this.minute += numOfTimeTicks;
   }
 }
 

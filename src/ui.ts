@@ -136,9 +136,7 @@ export function UI_log(text: string) {
 }
 
 export function shakeScreen(times = 5) {
-  for (let i = 0; i < 200; i++) {
-    doGlitchEffect(times);
-    doGlitchEffect(times);
+  for (let i = 0; i < 600; i++) {
     doGlitchEffect(times);
   }
 }

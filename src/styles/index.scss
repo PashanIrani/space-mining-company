@@ -28,10 +28,17 @@ $text-color: #000000;
 
 .glitch-fx {
   // opacity: 0.65 !important;
-  filter: blur(0.5px);
+  filter: blur(0.2px);
+  // filter: saturate(2);
   // transition: all 0.2s;
   // transform: translateX(-1px);
   // transform: translateY(-1px);
+}
+
+.group-resource-header-container {
+  h1 {
+    display: inline;
+  }
 }
 
 body {
@@ -166,7 +173,7 @@ fieldset {
   background: linear-gradient(180deg, #fcfcfe, #f4f3ee);
 
   &.disabled {
-    filter: brightness(0.5);
+    filter: brightness(0.75);
   }
 
   div {

@@ -65,6 +65,10 @@
           <p class="info-label">Date: <span class="time-formattedDate"></span></p>
           <p class="info-label">Company Establised: <span class="time-established"></span></p>
         </fieldset>
+        <fieldset class="no-background basic-border">
+          <legend class="match-text">System Info</legend>
+          <p class="info-label"><span class="save-next"></span></p>
+        </fieldset>
         <button onclick="clearLocalStorageAndReload()">Restart</button>
 
       </div>
@@ -87,15 +91,18 @@
       <div class="window-body">
         <p>Energy: <span class="energyGroup-amount"></span></p>
         <p>The lifeblood of progress, without it, all crumbles.</p>
-        <div class="group-composition-details">
+        <!-- <div class="group-composition-details">
           <div class="energyGroup-composition-details"></div>
-        </div>
+        </div> -->
         <hr class="space-only">
         <fieldset class="resource no-background basic-border">
           <legend class="match-text">Source of Energy</legend>
           <!-- LABOR -->
           <div id="labor-window">
-            <h1>Labor</h1>
+            <div class="group-resource-header-container">
+              <h1>Labor</h1> (<span class="energyGroup-labor-weight"></span>)
+            </div>
+
             <p>Amount: <span class="labor-amount"></span>/<span class="labor-capacity"></span> <span
                 class="labor-buildStatus"></span>
             </p>
@@ -117,7 +124,9 @@
           <!-- LABOR -->
           <div id="coffee-window">
             <hr>
-            <h1>Coffee</h1>
+            <div class="group-resource-header-container">
+              <h1>Coffee</h1> (<span class="energyGroup-coffee-weight"></span>)
+            </div>
             <p>Amount: <span class="coffee-amount"></span>/<span class="coffee-capacity"></span> <span
                 class="coffee-buildStatus"></span>
             </p>

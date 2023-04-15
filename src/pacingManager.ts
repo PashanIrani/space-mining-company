@@ -5,15 +5,10 @@ export class PacingManger {
   private _resources: any;
   public introducedWindows: string[]; // holds names of each window that has been introduced to the player
 
-  constructor(resources: any, saveEnabled: boolean) {
+  constructor(resources: any) {
     this._resources = resources;
-    let alreadyIntroducedWindows = saveEnabled ? localStorage.getItem('pacing') : null;
 
-    if (alreadyIntroducedWindows == null) {
-      this.introducedWindows = [];
-    } else {
-      this.introducedWindows = JSON.parse(alreadyIntroducedWindows);
-    }
+    this.introducedWindows = []; // TODO: populate this from Save
 
     let hideWindows = [this._resources.funds.name, 'store', this._resources.coffee.name, 'stats'];
 
@@ -40,6 +35,5 @@ export class PacingManger {
 
     UI_showWindow(name);
     this.introducedWindows.push(name);
-    localStorage.setItem('pacing', JSON.stringify(this.introducedWindows));
   }
 }
