@@ -3,13 +3,14 @@ import { TIME_TICK_SPEED, Time } from './time'
 import './styles/index.scss';
 import { PacingManger } from "./pacingManager";
 import { Store, StoreItem } from "./store";
-import { UI_log, doGlitchEffect, shakeScreen } from "./ui";
+import { UI_log } from "./ui";
+import { SaveSystem } from "./saveSystem";
 
 const DEV = true;
-const SAVE_ENABLED = true;
 
-
-UI_log("Welcome to Space Mining Company!");
+if (!SaveSystem.loadLog()) {
+  UI_log("Welcome to Space Mining Company!");
+}
 
 // INIT TIME
 const currentDate = new Date();
@@ -20,9 +21,7 @@ const currentDay = currentDate.getDate();
 const currentHour = currentDate.getHours();
 const currentMinute = currentDate.getMinutes();
 
-Time.setInitTime(currentMinute, currentHour, currentDay, currentMonth, currentYear, true);
-Time.setNewGameTime(currentMinute, currentHour, currentDay, currentMonth, currentYear);
-
+Time.setInitTime(currentMinute, currentHour, currentDay, currentMonth, currentYear);
 
 
 const labor = new Resource({
@@ -72,7 +71,7 @@ const funds = new Resource({
 
 export const ALL_RESOURCES: AllResourceDefination = { labor, funds, coffee, energyGroup };
 
-const pm = new PacingManger(ALL_RESOURCES, SAVE_ENABLED);
+PacingManger.init(ALL_RESOURCES);
 
 const store = new Store({
   'enableStats': {
@@ -80,7 +79,7 @@ const store = new Store({
     displayDescription: "Updates OS to show system stats.",
     costs: [{ resource: 'energyGroup', amount: 15 }],
     onPurchase: () => {
-      pm.showWindow('stats');
+      PacingManger.showWindow('stats');
       UI_log('The system has been updated, and you are now able to access information about it.');
     },
     purchased: false,
@@ -179,7 +178,7 @@ const store = new Store({
     costs: [{ resource: 'funds', amount: 50 }, { resource: 'energyGroup', amount: 100 }],
     onPurchase: () => {
       coffee.enabled = true;
-      pm.showWindow(coffee.name);
+      PacingManger.showWindow(coffee.name);
       energyGroup.drawCompositionDetails();
       UI_log("Coffee Machine Purchased!");
     },
@@ -244,15 +243,16 @@ const store = new Store({
 });
 
 Store.reDraw();
-pm.check();
+PacingManger.check();
 
+SaveSystem.startAutoSaving();
 // add callbacks to each resource
 for (const key in ALL_RESOURCES) {
   let resource = ALL_RESOURCES[key];
   resource.init();
   resource.onAmountUpdate(() => {
     Store.reDraw();
-    pm.check();
+    PacingManger.check();
   })
 }
 

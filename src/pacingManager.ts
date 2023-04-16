@@ -1,14 +1,14 @@
 import { Resource } from "./resource";
-import { UI_hideWindow, UI_showWindow } from "./ui";
+import { UI_hideWindow, UI_shakeScreen, UI_showWindow } from "./ui";
 
 export class PacingManger {
-  private _resources: any;
-  public introducedWindows: string[]; // holds names of each window that has been introduced to the player
+  static _resources: any;
+  static introducedWindows: string[]; // holds names of each window that has been introduced to the player
 
-  constructor(resources: any) {
+  static init(resources: any) {
     this._resources = resources;
 
-    this.introducedWindows = []; // TODO: populate this from Save
+    this.introducedWindows = [];
 
     let hideWindows = [this._resources.funds.name, 'store', this._resources.coffee.name, 'stats'];
 
@@ -19,7 +19,11 @@ export class PacingManger {
 
   }
 
-  check() {
+  static check() {
+    this.introducedWindows.forEach(windowName => {
+      this.showWindow(windowName);
+    });
+
     if (this._resources.labor.amount >= 10) {
       this.showWindow(this._resources.funds.name);
       this._resources.funds.enabled = true;
@@ -30,10 +34,11 @@ export class PacingManger {
     }
   }
 
-  showWindow(name: string) {
-    if (this.introducedWindows.includes(name)) return;
+  static showWindow(name: string) {
 
     UI_showWindow(name);
+    if (this.introducedWindows.includes(name)) return;
     this.introducedWindows.push(name);
+    UI_shakeScreen();
   }
 }

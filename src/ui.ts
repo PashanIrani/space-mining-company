@@ -40,7 +40,6 @@ export function UI_showWindow(name: string) {
     element.style.position = 'static';
   }
 
-  shakeScreen();
 }
 // Hides HTML element with id of `name`-window
 export function UI_hideWindow(name: string) {
@@ -109,7 +108,20 @@ export function UI_drawStore(storeItems: StoreDefination) {
 }
 
 
-export function doGlitchEffect(count: number) {
+export function UI_log(text: string) {
+  let logScreenContainer = document.getElementById("log-screen-container");
+  document.getElementById("log-screen").innerHTML += `<br>${Time.getCurrentTimestamp()}${text}`;
+
+  logScreenContainer.scrollTop = logScreenContainer.scrollHeight;
+}
+
+export function UI_shakeScreen(times = 5) {
+  for (let i = 0; i < 600; i++) {
+    doGlitchEffect(times);
+  }
+}
+
+function doGlitchEffect(count: number) {
 
   if (count <= 0) return;
   const elements = document.querySelectorAll('*:not(body):not(html)');
@@ -127,16 +139,4 @@ export function doGlitchEffect(count: number) {
   setTimeout(() => {
     doGlitchEffect(count - 1)
   }, randomInterval);
-}
-export function UI_log(text: string) {
-  let logScreenContainer = document.getElementById("log-screen-container");
-  document.getElementById("log-screen").innerHTML += `<br>${Time.getCurrentTimestamp()}${text}`;
-
-  logScreenContainer.scrollTop = logScreenContainer.scrollHeight;
-}
-
-export function shakeScreen(times = 5) {
-  for (let i = 0; i < 600; i++) {
-    doGlitchEffect(times);
-  }
 }

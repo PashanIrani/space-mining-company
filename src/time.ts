@@ -16,11 +16,7 @@ export class Time {
 
   static newGameTime: { minute: number, hour: number, day: number, month: number, year: number };
 
-  static setNewGameTime(minute: number = 0, hour: number = 0, day: number = 1, month: number = 1, year: number = 0) {
-  }
-
-  static setInitTime(minute: number = 0, hour: number = 0, day: number = 1, month: number = 1, year: number = 0, newGame: boolean = false) {
-    console.log(minute);
+  static setInitTime(minute: number = 0, hour: number = 0, day: number = 1, month: number = 1, year: number = 0) {
 
     this.minute = minute;
     this.hour = hour;
@@ -28,13 +24,11 @@ export class Time {
     this.month = month;
     this.year = year;
 
-    if (newGame) {
-      this.newGameTime = {
-        minute, hour, day, month, year
-      }
-
-      UI_displayText('time', 'established', `${this.getFormatedDate(this.newGameTime.day, this.newGameTime.month, this.newGameTime.year)} @ ${this.getFormatedTime(this.newGameTime.hour, this.newGameTime.minute)}`)
+    this.newGameTime = {
+      minute, hour, day, month, year
     }
+
+    UI_displayText('time', 'established', `${this.getFormatedDate(this.newGameTime.day, this.newGameTime.month, this.newGameTime.year)} @ ${this.getFormatedTime(this.newGameTime.hour, this.newGameTime.minute)}`)
 
     this.startTime();
 
@@ -45,13 +39,16 @@ export class Time {
   }
 
   static set minute(value: number) {
-    if (value >= MAX_MINUTE + 1) {
-      value = 0;
-      this.hour++;
+    console.log(value);
+
+    if (value >= MAX_MINUTE) {
+      this.hour += Math.floor(value / (MAX_MINUTE));
+      value = value % (MAX_MINUTE);
+      console.log(value % (MAX_MINUTE), Math.floor(value / (MAX_MINUTE)));
+
     }
 
     this._minute = value;
-    // UI_displayValue('time', 'minuteValue', this._minute, 0, 2);
     UI_displayText('time', 'formattedTime', this.getFormatedTime());
   }
 
@@ -94,7 +91,6 @@ export class Time {
     }
 
     this._month = value;
-    // UI_displayValue('time', 'monthValue', this._month);
     UI_displayText('time', 'formattedDate', this.getFormatedDate());
   }
 
@@ -104,7 +100,6 @@ export class Time {
 
   static set year(value: number) {
     this._year = value;
-    // UI_displayValue('time', 'yearValue', this._year);
     UI_displayText('time', 'formattedDate', this.getFormatedDate());
   }
 

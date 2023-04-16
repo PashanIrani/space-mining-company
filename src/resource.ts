@@ -109,6 +109,10 @@ export class Resource {
         UI_displayText(this.name, 'costs', Cost_getCostDisplayString(this.costs));
       });
     }
+
+    if (this.buildStatus > 0) {
+      this.initiateBuild();
+    }
   }
 
   // Registers a callback that will be called when amount is updated
@@ -324,10 +328,14 @@ export class Resource {
       let timeCostTickInterval: NodeJS.Timer = null;
       // Increment minutes as it build
       if (this.timeCost > 1) {
-        const timePerTimeCostMin = this.timeToBuildMs / this.timeCost;
+        if (this.timeToBuildMs <= this.timeCost) {
+          console.error("TimeToBuildMS CANNOT be less than timeCost for ", this.name);
+        }
+
+        const timePerCostMin = this.timeToBuildMs / this.timeCost;
         timeCostTickInterval = setInterval(() => {
           Time.minute += 1;
-        }, timePerTimeCostMin);
+        }, timePerCostMin);
       }
 
       setTimeout(() => {
@@ -359,8 +367,6 @@ export class Resource {
 
   //! Only run after it is fully okay to build after checks with canAffordGeneration() and ONLY after Resource_performCostTransaction()
   private build(amount: number = this.generateAmount) {
-    console.log('BUILD!', amount);
-
     this.amount += amount;
     this._afterNewGeneration(this.amount, amount);
 
