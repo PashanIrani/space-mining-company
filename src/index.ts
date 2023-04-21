@@ -42,7 +42,7 @@ const coffee = new Resource({
   label: 'Coffee',
   amount: 0,
   generateAmount: 1,
-  capacity: 1,
+  capacity: 5,
   costs: [{ resource: 'labor', amount: 1 }, { resource: 'funds', amount: 2 }],
   timeToBuildMs: 5000,
   holdToGenerateAmount: 0,
@@ -74,7 +74,7 @@ export const ALL_RESOURCES: AllResourceDefination = { labor, funds, coffee, ener
 PacingManger.init(ALL_RESOURCES);
 
 const store = new Store({
-  'enableStats': {
+  'enable-stats': {
     displayName: 'System Update',
     displayDescription: "Updates OS to show system stats.",
     costs: [{ resource: 'energyGroup', amount: 15 }],
@@ -88,13 +88,13 @@ const store = new Store({
   'enable-hiring': {
     displayName: 'Recruit Help',
     displayDescription: "Will enable the ablity to hire.",
-    costs: [{ resource: 'energyGroup', amount: 500 }, { resource: 'funds', amount: 1000 }],
+    costs: [{ resource: 'energyGroup', amount: 100 }, { resource: 'funds', amount: 1000 }],
     onPurchase: () => {
       // TODO
       UI_log("Recruitment program installed.");
     },
     purchased: false,
-    dependsOn: 'enableStats',
+    dependsOn: 'enable-stats',
   },
   'profit1': {
     displayName: 'Funds Boost',
@@ -129,7 +129,7 @@ const store = new Store({
       }
     },
     purchased: false,
-    dependsOn: 'enableStats',
+    dependsOn: 'enable-stats',
   },
   'energy-enableHoldGeneration2': {
     displayName: 'Super Anti-Carpal Tunnel Cream',
@@ -152,7 +152,7 @@ const store = new Store({
       labor.generateAmount *= 2;
     },
     purchased: false,
-    dependsOn: 'enableStats',
+    dependsOn: 'enable-stats',
   }, 'increase-labor-generationAmount2': {
     displayName: 'Amplify Labor (2)',
     displayDescription: "Doubles the amount of [labor] generated.",
@@ -187,53 +187,53 @@ const store = new Store({
   },
   'coffee-capacity1': {
     displayName: 'Coffee Enjoyer',
-    displayDescription: "Become a coffee enjoyer. Increases capacity of [coffee] to 2.",
-    costs: [{ resource: 'energyGroup', amount: 115 }],
-    onPurchase: () => {
-      coffee.capacity = 2;
-    },
-    purchased: false,
-    dependsOn: 'enableCoffee',
-  }, 'coffee-capacity2': {
-    displayName: 'Coffee Enthusiast',
-    displayDescription: "Become a coffee enthusiast. Increases capacity of [coffee] to 5.",
-    costs: [{ resource: 'energyGroup', amount: 130 }],
-    onPurchase: () => {
-      coffee.capacity = 5;
-    },
-    purchased: false,
-    dependsOn: 'coffee-capacity1',
-  }, 'coffee-capacity3': {
-    displayName: 'Coffee Addict',
-    displayDescription: "Become a coffee enthusiast. Increases capacity of [coffee] to 10.",
+    displayDescription: "Become a coffee enjoyer. Increases capacity of [coffee] to 10.",
     costs: [{ resource: 'energyGroup', amount: 175 }],
     onPurchase: () => {
       coffee.capacity = 10;
     },
     purchased: false,
-    dependsOn: 'coffee-capacity2',
-  }, 'coffee-capacity4': {
-    displayName: 'Coffeeholic',
-    displayDescription: "Become a Coffeeholic. Increases capacity of [coffee] to 20.",
+    dependsOn: 'enableCoffee',
+  }, 'coffee-capacity2': {
+    displayName: 'Coffee Enthusiast',
+    displayDescription: "Become a coffee enthusiast. Increases capacity of [coffee] to 20.",
     costs: [{ resource: 'energyGroup', amount: 250 }],
     onPurchase: () => {
       coffee.capacity = 20;
     },
     purchased: false,
+    dependsOn: 'coffee-capacity1',
+  }, 'coffee-capacity3': {
+    displayName: 'Coffee Addict',
+    displayDescription: "Become a coffee enthusiast. Increases capacity of [coffee] to 40.",
+    costs: [{ resource: 'energyGroup', amount: 400 }],
+    onPurchase: () => {
+      coffee.capacity = 40;
+    },
+    purchased: false,
+    dependsOn: 'coffee-capacity2',
+  }, 'coffee-capacity4': {
+    displayName: 'Coffeeholic',
+    displayDescription: "Become a Coffeeholic. Increases capacity of [coffee] to 60.",
+    costs: [{ resource: 'energyGroup', amount: 700 }],
+    onPurchase: () => {
+      coffee.capacity = 60;
+    },
+    purchased: false,
     dependsOn: 'coffee-capacity3',
   }, 'coffee-capacity5': {
     displayName: 'Java Junkie',
-    displayDescription: "Become a Java Junkie. Increases capacity of [coffee] to 50.",
-    costs: [{ resource: 'energyGroup', amount: 400 }],
+    displayDescription: "Become a Java Junkie. Increases capacity of [coffee] to 80.",
+    costs: [{ resource: 'energyGroup', amount: 1000 }],
     onPurchase: () => {
-      coffee.capacity = 50;
+      coffee.capacity = 80;
     },
     purchased: false,
     dependsOn: 'coffee-capacity4',
   }, 'coffee-capacity6': {
     displayName: 'Coffee Pot',
     displayDescription: "Become a walking, talking coffee pot. Increases capacity of [coffee] to 100.",
-    costs: [{ resource: 'energyGroup', amount: 850 }],
+    costs: [{ resource: 'energyGroup', amount: 1300 }],
     onPurchase: () => {
       coffee.capacity = 100;
     },
