@@ -24,14 +24,14 @@ export class Time {
     this.month = month;
     this.year = year;
 
-    this.newGameTime = {
-      minute, hour, day, month, year
-    }
 
-    UI_displayText('time', 'established', `${this.getFormatedDate(this.newGameTime.day, this.newGameTime.month, this.newGameTime.year)} @ ${this.getFormatedTime(this.newGameTime.hour, this.newGameTime.minute)}`)
-
+    this.setNewGameTime(minute, hour, day, month, year);
     this.startTime();
+  }
 
+  static setNewGameTime(minute: number = 0, hour: number = 0, day: number = 1, month: number = 1, year: number = 0) {
+    this.newGameTime = { minute, hour, day, month, year }
+    UI_displayText('time', 'established', `${this.getFormatedDate(this.newGameTime.day, this.newGameTime.month, this.newGameTime.year)} @ ${this.getFormatedTime(this.newGameTime.hour, this.newGameTime.minute)}`)
   }
 
   static get minute() {

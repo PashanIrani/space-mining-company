@@ -179,16 +179,11 @@ export class SaveSystem {
     Time.month = timeData.month;
     Time.year = timeData.year;
 
-    let newGameTimeDataString = localStorage.getItem(TIME);
+    let newGameTimeDataString = localStorage.getItem(NEW_GAME_TIME);
     if (newGameTimeDataString === null) return;
 
     const newGameTime = JSON.parse(newGameTimeDataString);
-    Time.newGameTime.minute = newGameTime.minute;
-    Time.newGameTime.hour = newGameTime.hour;
-    Time.newGameTime.day = newGameTime.day;
-    Time.newGameTime.month = newGameTime.month;
-    Time.newGameTime.year = newGameTime.year;
-
+    Time.setNewGameTime(newGameTime.minute, newGameTime.hour, newGameTime.day, newGameTime.month, newGameTime.year);
   }
 
   static saveLog() {
