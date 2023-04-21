@@ -137,7 +137,7 @@ export class Resource {
       }
 
 
-      UI_displayText(this.name, 'rate', `${rate > 0 ? '+' : ''}${rate}/s ${timeLeftText != null ? `(${timeLeftText})` : ''}`);
+      UI_displayText(this.name, 'rate', `${rate > 0 ? '+' : ''}${formatNumberString(rate, 2)}/s ${timeLeftText != null ? `(${timeLeftText})` : ''}`);
       prevValue = this.amount;
     }, 1000);
   }
@@ -257,7 +257,7 @@ export class Resource {
 
   set generateAmount(value: number) {
     this._generateAmount = value;
-    UI_displayValue(this.name, 'generate-amount', value)
+    UI_displayValue(this.name, 'generate-amount', value, 2)
   }
 
   get timeToBuildMs(): number {
