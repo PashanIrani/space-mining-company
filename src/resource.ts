@@ -26,12 +26,13 @@ export interface GroupResouceDefination {
   label: string // name shown on screen
   groupResources: { resource: Resource, multiplier: number }[]
 }
+
 // checks if all the costs are met
-export function Resource_canAffordGeneration(costs: Cost[]): boolean {
+export function Resource_canAffordGeneration(costs: Cost[], efficiency: number = 1, splitBy: number = 1): boolean {
   for (let i = 0; i < costs.length; i++) {
     const cost = costs[i];
 
-    if (ALL_RESOURCES[cost.resource].amount < cost.amount) {
+    if (ALL_RESOURCES[cost.resource].amount < (cost.amount / splitBy) * efficiency) {
       return false;
     }
   }
@@ -40,15 +41,15 @@ export function Resource_canAffordGeneration(costs: Cost[]): boolean {
 }
 
 // TODO: add locks to everything using these resource to fully perform transaction
-export function Resource_performCostTransaction(costs: Cost[]): boolean {
+export function Resource_performCostTransaction(costs: Cost[], efficiency: number = 1, splitBy: number = 1): boolean {
   for (let i = 0; i < costs.length; i++) {
     const cost = costs[i];
 
-    if (ALL_RESOURCES[cost.resource].amount < cost.amount) {
+    if (ALL_RESOURCES[cost.resource].amount < (cost.amount / splitBy) * efficiency) {
       return false;
     }
 
-    ALL_RESOURCES[cost.resource].performDeduction(cost.amount);
+    ALL_RESOURCES[cost.resource].performDeduction((cost.amount / splitBy) * efficiency);
   }
 
   return true;
@@ -164,7 +165,7 @@ export class Resource {
     const generateButton = document.getElementById(`${this.name}-generate-button`);
 
     if (generateButton) {
-      generateButton.addEventListener('click', this.generate.bind(this));
+      generateButton.addEventListener('click', () => { this.generate() });
 
       generateButton.addEventListener('mousedown', this.mouseHoldStart.bind(this));
       generateButton.addEventListener('mouseup', this.mouseHoldEnd.bind(this));
@@ -306,7 +307,7 @@ export class Resource {
     return true;
   }
 
-  private getSumOfBuildQueue() {
+  public getSumOfBuildQueue() {
     let sum = 0;
     for (let i = 0; i < this.buildQueue.length; i++) {
       sum += this.buildQueue[i];
@@ -366,12 +367,13 @@ export class Resource {
   }
 
   //! Only run after it is fully okay to build after checks with canAffordGeneration() and ONLY after Resource_performCostTransaction()
-  private build(amount: number = this.generateAmount) {
+  public build(amount: number = this.generateAmount, splitBy: number = 1) {
+    amount = amount / splitBy;
     this.amount += amount;
     this._afterNewGeneration(this.amount, amount);
 
     if (this.timeToBuildMs == 0)
-      Time.minute += this.timeCost;
+      Time.minute += (this.timeCost / splitBy);
   }
 
   performDeduction(amountToDeduct: number) {

@@ -1,6 +1,7 @@
-import { ALL_RESOURCES } from ".";
+import { ALL_RESOURCES, staff } from ".";
 import { PacingManger } from "./pacingManager";
 import { GroupResource } from "./resource";
+import { StaffMember } from "./staff";
 import { Store } from "./store";
 import { Time } from "./time";
 
@@ -11,6 +12,7 @@ const INTRODUCED_WINDOWS = "introducedWindows";
 const TIME = "timeData";
 const NEW_GAME_TIME = "newGametimeData";
 const LOGS = "logs";
+const STAFF = "staff";
 
 interface ResourceData {
   amount: number,
@@ -37,6 +39,7 @@ export class SaveSystem {
     this.loadStoreItems();
     this.loadIntroducedWindows();
     this.loadTime();
+    this.loadStaff();
 
     setInterval(() => {
       this.saveAll();
@@ -49,6 +52,7 @@ export class SaveSystem {
     this.saveIntroducedWindows();
     this.saveTime();
     this.saveLog();
+    this.saveStaff();
 
     // Save current Time
     localStorage.setItem(LAST_SAVE, new Date().getTime() + "");
@@ -201,6 +205,32 @@ export class SaveSystem {
     }
     logScreenContainer.scrollTop = logScreenContainer.scrollHeight;
     return set;
+  }
+
+  static saveStaff() {
+    let data: any[] = [];
+    staff.members.forEach(staff => {
+      data.push({
+        gender: staff.gender,
+        name: staff.name,
+        efficiency: staff.efficiency,
+        assignment: staff.assignment?.name
+      })
+    });
+
+    localStorage.setItem(STAFF, JSON.stringify(data));
+  }
+
+  static loadStaff() {
+    let savedMembers = localStorage.getItem(STAFF);
+    if (savedMembers) {
+      let details: any[] = JSON.parse(savedMembers);
+      let members: StaffMember[] = [];
+      details.forEach(detail => {
+        members.push(new StaffMember(detail.gender, detail.name, detail.efficiency, detail.assignment));
+      })
+      staff.members = members;
+    }
   }
 
   static isNewGame(): boolean {

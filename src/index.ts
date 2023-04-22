@@ -5,6 +5,7 @@ import { PacingManger } from "./pacingManager";
 import { Store, StoreItem } from "./store";
 import { UI_log } from "./ui";
 import { SaveSystem } from "./saveSystem";
+import { StaffMember, StaffResource } from "./staff";
 
 const DEV = true;
 
@@ -62,14 +63,27 @@ const funds = new Resource({
   amount: 0,
   generateAmount: 1,
   capacity: 1000,
-  costs: [{ resource: 'energyGroup', amount: 10 }],
+  costs: [{ resource: 'energyGroup', amount: 1 }],
   timeToBuildMs: 500,
   enabled: false,
   timeCost: 10,
 });
 
+export const staff = new StaffResource({
+  name: 'staff',
+  label: 'Staff',
+  amount: 0,
+  generateAmount: 1,
+  capacity: 5,
+  costs: [{ resource: 'funds', amount: 1 }],
+  timeToBuildMs: 1000,
+  enabled: false,
+  timeCost: 500,
+});
 
-export const ALL_RESOURCES: AllResourceDefination = { labor, funds, coffee, energyGroup };
+export const ALL_RESOURCES: AllResourceDefination = { labor, funds, coffee, energyGroup, staff };
+
+export const WorkableResourceList: string[] = ['labor', 'funds', 'coffee'];
 
 PacingManger.init(ALL_RESOURCES);
 
@@ -88,7 +102,7 @@ const store = new Store({
   'enable-hiring': {
     displayName: 'Recruit Help',
     displayDescription: "Will enable the ablity to hire.",
-    costs: [{ resource: 'energyGroup', amount: 100 }, { resource: 'funds', amount: 1000 }],
+    costs: [{ resource: 'energyGroup', amount: 1 }, { resource: 'funds', amount: 1 }],
     onPurchase: () => {
       // TODO
       UI_log("Recruitment program installed.");
@@ -255,4 +269,8 @@ for (const key in ALL_RESOURCES) {
     PacingManger.check();
   })
 }
+
+setTimeout(() => {
+  Store.reDraw();
+}, 10);
 

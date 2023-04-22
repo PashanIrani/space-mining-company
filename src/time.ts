@@ -39,8 +39,6 @@ export class Time {
   }
 
   static set minute(value: number) {
-    console.log(value);
-
     if (value >= MAX_MINUTE) {
       this.hour += Math.floor(value / (MAX_MINUTE));
       value = value % (MAX_MINUTE);
