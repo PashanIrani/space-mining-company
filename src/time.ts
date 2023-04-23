@@ -1,4 +1,4 @@
-import { formatNumberString } from "./helpers";
+import { formatNumberToString } from "./helpers";
 import { UI_displayText } from "./ui";
 
 const DAYS_PER_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -122,7 +122,7 @@ export class Time {
       formattedHour = 12;
     }
 
-    return `${formattedHour}:${formatNumberString(minute, 0, 2)} ${ampm}`;
+    return `${formattedHour}:${formatNumberToString(minute, 0, 2)} ${ampm}`;
   }
 
 
@@ -183,6 +183,29 @@ export class Time {
   static getCurrentTimestamp() {
     return this.year === undefined ? '' : `[${this.year}-${this.month}-${this.day} ${this.getFormatedTime()}] `;
   }
+
+  static generateDay(): { day: number, month: number, year: number } {
+    const today = new Date(Time.year, Time.month - 1, Time.day);
+    const minYear = today.getFullYear() - 51;
+    const maxYear = today.getFullYear() - 18;
+    const minDate = new Date(minYear, 0, 1);
+    const maxDate = new Date(maxYear, 11, 31);
+
+    const randomTime = Math.floor(Math.random() * (maxDate.getTime() - minDate.getTime()));
+    const randomDate = new Date(minDate.getTime() + randomTime);
+
+    const year = randomDate.getFullYear();
+    const month = randomDate.getMonth() + 1;
+    const daysInMonth = month === 2 && Time.isLeapYear(year) ? 29 : DAYS_PER_MONTH[month - 1];
+    const day = Math.floor(Math.random() * daysInMonth) + 1;
+
+    return { day, month, year };
+  }
+
+  static isLeapYear(year: number): boolean {
+    return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+  }
+
 }
 
 

@@ -1,6 +1,6 @@
 import { ALL_RESOURCES, WorkableResourceList } from ".";
 import { Cost_getCostDisplayString } from "./cost";
-import { formatNumberString, randomIntFromInterval } from "./helpers";
+import { formatNumberToString, randomIntFromInterval } from "./helpers";
 import { Resource_canAffordGeneration } from "./resource";
 import { StaffMember } from "./staff";
 import { Store, StoreDefination } from "./store";
@@ -13,7 +13,7 @@ export function UI_displayValue(name: string, valueType: string, value: number, 
   const elements = document.querySelectorAll(`.${name}-${valueType}`);
 
   elements.forEach(element => {
-    element.innerHTML = formatNumberString(value, decimals, charLength);
+    element.innerHTML = formatNumberToString(value, decimals, charLength);
   });
 }
 
@@ -185,23 +185,42 @@ export function UI_shakeScreen(times = 5) {
 export function UI_displayStaffMembers(members: StaffMember[]) {
   let staffListContainer = document.getElementById("staff-list-container");
   let html = ""
-  html = "<ul>";
+  html = `<div class="staff-container">`;
 
   for (let i = 0; i < members.length; i++) {
     const member = members[i];
-    html += `<li>${i + 1}. ${member.name.firstName} ${member.name.lastName} ${member.gender == 0 ? '♂' : member.gender == 1 ? '♀' : '⚥'}`
+    html += `<div class="staff-member-container">`
+    html += `<div class="face-container"><div class="face">${member.pic}</div></div>`;
+    html += `<div class="staff-info-container">`;
+    html += `<div> ${i + 1}. ${member.name.firstName} ${member.name.lastName} (${member.gender == 0 ? '♂' : member.gender == 1 ? '♀' : '⚥'})</div>`
+    html += `<div>Age: ${member.age}</div>`
+    html += `<div>Efficiency: ${member.efficiency * 100}%</div>`
+
+    html += `<div>Contribution: `;
+    if (member.genRatePerSec == 0) {
+      html += "none</div>"
+    } else {
+      html += `${member.genRatePerSec > 0 ? "+" : '-'}${member.genRatePerSec} ${member.assignment?.label}/s</div>`
+    }
+
+    html += "</div>"
+    html += `<div class="staff-assignment-selector-container">`
     html += `<select id="staff-job-${i}">`
     html += `<option value="null">---</option>`
     WorkableResourceList.forEach(r => {
-      html += `<option value="${r}" ${member.assignment?.name == ALL_RESOURCES[r].name ? 'selected' : ''}>${ALL_RESOURCES[r].label}</option>`
-      console.log(member.assignment?.name == ALL_RESOURCES[r].name, member.assignment?.name, ALL_RESOURCES[r].name);
-
+      if (ALL_RESOURCES[r].enabled) {
+        html += `<option value="${r}" ${member.assignment?.name == ALL_RESOURCES[r].name ? 'selected' : ''}>${ALL_RESOURCES[r].label}</option>`;
+      }
     })
     html += "</select>"
-    html += "</li>"
+    html += "</div>"
+    html += "</div>"
   }
 
-  html += "</ul>";
+  if (members.length == 0) {
+    html += "<p>You have no staff members</p>"
+  }
+  html += "</div>";
   staffListContainer.innerHTML = html;
 
 

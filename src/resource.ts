@@ -1,6 +1,6 @@
 import { UI_displayValue, UI_displayText, UI_updateProgressBar, UI_log } from "./ui";
 import { Cost, Cost_getCostDisplayString } from "./cost";
-import { formatNumberString } from "./helpers";
+import { convertTime, formatNumberToString } from "./helpers";
 import { Time } from "./time";
 import { ALL_RESOURCES } from ".";
 
@@ -130,15 +130,15 @@ export class Resource {
 
       let timeLeftText = null;
       if (rate < 0) {
-        timeLeftText = `${(this.amount / (rate * -1)).toFixed(2)}s left`;
+        timeLeftText = `${convertTime(this.amount / (rate * -1))} till empty`;
       }
 
       if (rate > 0 && this.capacity) {
-        timeLeftText = `${((this.capacity - this.amount) / rate).toFixed(2)}s to full`;
+        timeLeftText = `${convertTime(((this.capacity - this.amount) / rate))} to full`;
       }
 
 
-      UI_displayText(this.name, 'rate', `${rate > 0 ? '+' : ''}${formatNumberString(rate, 2)}/s ${timeLeftText != null ? `(${timeLeftText})` : ''}`);
+      UI_displayText(this.name, 'rate', `${rate > 0 ? '+' : ''}${formatNumberToString(rate, 2)}/s ${timeLeftText != null ? `(${timeLeftText})` : ''}`);
       prevValue = this.amount;
     }, 1000);
   }
@@ -283,7 +283,7 @@ export class Resource {
     if (this.buildStatus == 0) {
       UI_displayText(this.name, 'buildStatus', '');
     } else {
-      UI_displayText(this.name, 'buildStatus', `[${formatNumberString(Math.round(this.buildStatus * 100), 0, -1)}%${queueString}]`);
+      UI_displayText(this.name, 'buildStatus', `[${formatNumberToString(Math.round(this.buildStatus * 100), 0, -1)}%${queueString}]`);
     }
   }
 

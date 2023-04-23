@@ -98,7 +98,7 @@
             <div class="group-resource-header-container">
               <h1>Labor</h1> (<span class="energyGroup-labor-weight"></span>)
             </div>
-
+            <p>Powers your machines and produces goods. Without it, operations halt.</p>
             <p>Amount: <span class="labor-amount"></span>/<span class="labor-capacity"></span> <span
                 class="labor-buildStatus"></span>
             </p>
@@ -117,29 +117,6 @@
             </div>
           </div>
 
-          <!-- LABOR -->
-          <div id="coffee-window">
-            <hr>
-            <div class="group-resource-header-container">
-              <h1>Coffee</h1> (<span class="energyGroup-coffee-weight"></span>)
-            </div>
-            <p>Amount: <span class="coffee-amount"></span>/<span class="coffee-capacity"></span> <span
-                class="coffee-buildStatus"></span>
-            </p>
-            <p>Cost: <span class="coffee-costs"></span></p>
-            <!-- <p>Advances Time by: <span class="labor-time-cost"></span> min</p> -->
-            <p><span></span></p>
-            <div class="progress-bar-container"><span class="coffee-progress-bar"></span></div>
-
-            <div class="button-container">
-              <span class="rate-text">Rate: <span class="coffee-rate"></span></span>
-              <div>
-                <button id="coffee-generate-button">Generate <span class="coffee-label"></span> (<span
-                    class="coffee-generate-amount"></span>)</button>
-                <p class="hold-button-text coffee-hold-amount"></p>
-              </div>
-            </div>
-          </div>
         </fieldset>
       </div>
 
@@ -184,7 +161,7 @@
 
   <!-- STAFF MANAGEMENT -->
   <div class="row">
-    <div id="store-window" class="window">
+    <div id="staff-window" class="window">
       <div class="title-bar">
         <div class="title-bar-text">Staff</div>
         <div class="title-bar-controls">
@@ -194,8 +171,8 @@
         </div>
       </div>
       <div class="window-body">
-        <p>asdasdasd</p>
-        <p>Staff Members: <span class="staff-amount"></span>/<span class="staff-capacity"></span> <span
+        <p>Brings your vision to life. With their skills and dedication, anything is possible.</p>
+        <p>Total Staff Members: <span class="staff-amount"></span>/<span class="staff-capacity"></span> <span
             class="staff-buildStatus"></span>
         </p>
         <p>Cost: <span class="staff-costs"></span></p>
@@ -206,7 +183,37 @@
             <p class="hold-button-text staff-hold-amount"></p>
           </div>
         </div>
-        <div id="staff-list-container"></div>
+
+        <fieldset class="resource no-background basic-border no-padding">
+          <legend class="match-text">Staff Members</legend>
+          <div id="staff-list-container"></div>
+        </fieldset>
+
+
+        <!-- Coffee -->
+        <div id="coffee-window">
+          <hr>
+          <div class="group-resource-header-container">
+            <h1>Coffee</h1> (<span class="energyGroup-coffee-weight"></span>)
+          </div>
+          <p>Liquid gold that keeps workers alert and productive. Essential for efficiency.</p>
+          <p>Amount: <span class="coffee-amount"></span>/<span class="coffee-capacity"></span> <span
+              class="coffee-buildStatus"></span>
+          </p>
+          <p>Cost: <span class="coffee-costs"></span></p>
+          <!-- <p>Advances Time by: <span class="labor-time-cost"></span> min</p> -->
+          <p><span></span></p>
+          <div class="progress-bar-container"><span class="coffee-progress-bar"></span></div>
+
+          <div class="button-container">
+            <span class="rate-text">Rate: <span class="coffee-rate"></span></span>
+            <div>
+              <button id="coffee-generate-button">Generate <span class="coffee-label"></span> (<span
+                  class="coffee-generate-amount"></span>)</button>
+              <p class="hold-button-text coffee-hold-amount"></p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

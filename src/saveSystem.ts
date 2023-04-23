@@ -1,7 +1,7 @@
 import { ALL_RESOURCES, staff } from ".";
 import { PacingManger } from "./pacingManager";
 import { GroupResource } from "./resource";
-import { StaffMember } from "./staff";
+import { StaffMember, TICKS_PER_SEC } from "./staff";
 import { Store } from "./store";
 import { Time } from "./time";
 
@@ -22,7 +22,8 @@ interface ResourceData {
   holdToGenerateAmount: number,
   buildQueue: number[],
   buildStatus: number,
-  timeCost: number
+  timeCost: number,
+  enabled: boolean,
 }
 
 interface ResourceDataCollection {
@@ -75,6 +76,7 @@ export class SaveSystem {
         buildQueue: resource.buildQueue,
         buildStatus: resource.buildStatus,
         timeCost: resource.timeCost,
+        enabled: resource.enabled,
       }
     }
 
@@ -91,7 +93,6 @@ export class SaveSystem {
 
   }
   static loadResources() {
-    const now = new Date().getTime();
 
     const resourceDataString = localStorage.getItem(RESOURCES);
     if (resourceDataString == null) {
@@ -99,11 +100,10 @@ export class SaveSystem {
     }
 
     const resourceData = JSON.parse(resourceDataString);
-    console.log(resourceData);
 
     for (const key in resourceData) {
       // Calculate how much of the Build Queue is completed
-      this.advanceBuildQueue(resourceData[key], now - this.lastSaveTime);
+      this.advanceBuildQueue(resourceData[key], this.getOfflineMs());
 
       // Add data to game
       ALL_RESOURCES[key].capacity = resourceData[key].capacity;
@@ -114,6 +114,7 @@ export class SaveSystem {
       ALL_RESOURCES[key].buildStatus = resourceData[key].buildStatus;
       ALL_RESOURCES[key].timeCost = resourceData[key].timeCost;
       ALL_RESOURCES[key].amount = resourceData[key].amount;
+      ALL_RESOURCES[key].enabled = resourceData[key].enabled;
     }
 
 
@@ -214,7 +215,9 @@ export class SaveSystem {
         gender: staff.gender,
         name: staff.name,
         efficiency: staff.efficiency,
-        assignment: staff.assignment?.name
+        assignment: staff.assignment?.name,
+        birthdate: { day: staff.birthDate.day, month: staff.birthDate.month, year: staff.birthDate.year },
+        pic: staff.pic
       })
     });
 
@@ -227,16 +230,35 @@ export class SaveSystem {
       let details: any[] = JSON.parse(savedMembers);
       let members: StaffMember[] = [];
       details.forEach(detail => {
-        members.push(new StaffMember(detail.gender, detail.name, detail.efficiency, detail.assignment));
+        members.push(new StaffMember(staff.onStaffMemberUpdate.bind(staff), detail.efficiency, detail.gender, detail.name, detail.assignment, detail.birthdate, detail.pic));
       })
       staff.members = members;
     }
+
+    this.advanceStaffWork(this.getOfflineMs());
   }
 
   static isNewGame(): boolean {
     return localStorage.getItem(LAST_SAVE) == null;
   }
 
+
+  static getOfflineMs() {
+    const now = new Date().getTime();
+    return now - this.lastSaveTime;
+  }
+
+  static advanceStaffWork(ms: number) {
+    let totalTicks = TICKS_PER_SEC * (ms / 1000);
+
+    staff.members.forEach(staff => {
+      console.log(`Number of ticks for staff done offline: ${totalTicks}`);
+
+      for (let i = 0; i < totalTicks; i++) {
+        staff.perTickAction();
+      }
+    });
+  }
   // Advances build Queue
   static advanceBuildQueue(resourceData: ResourceData, ms: number) {
     let totalTimeCost = 0;
