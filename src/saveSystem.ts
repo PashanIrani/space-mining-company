@@ -34,7 +34,16 @@ export class SaveSystem {
   static readonly AUTO_SAVE_FREQ = 2000;
   static lastSaveTime: number;
 
+
+
   static startAutoSaving() {
+    var loadingScreen = document.createElement("div");
+    loadingScreen.className = "loading-screen";
+    var loadingText = document.createElement("p");
+    loadingText.textContent = "Loading...";
+    loadingScreen.appendChild(loadingText);
+    document.body.appendChild(loadingScreen);
+
     this.loadLastSaveTime();
     this.loadResources();
     this.loadStoreItems();
@@ -45,6 +54,9 @@ export class SaveSystem {
     setInterval(() => {
       this.saveAll();
     }, this.AUTO_SAVE_FREQ);
+
+    loadingScreen.parentNode.removeChild(loadingScreen);
+
   }
 
   static saveAll() {

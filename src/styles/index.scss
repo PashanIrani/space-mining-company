@@ -198,6 +198,27 @@ h1 {
   text-decoration: underline;
 }
 
+.loading-screen {
+  width: 100vw;
+  height: 100vh;
+  background-color: #000000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 99999;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+
+  p {
+    margin: 0;
+    font-size: 2rem;
+    text-align: center;
+  }
+}
+
 fieldset {
 
   &.no-padding {
