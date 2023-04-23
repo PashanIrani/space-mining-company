@@ -200,7 +200,7 @@ export function UI_displayStaffMembers(members: StaffMember[]) {
     if (member.genRatePerSec == 0) {
       html += "none</div>"
     } else {
-      html += `${member.genRatePerSec > 0 ? "+" : '-'}${member.genRatePerSec} ${member.assignment?.label}/s</div>`
+      html += `${member.genRatePerSec > 0 ? "+" : '-'}${formatNumberToString(member.genRatePerSec, 3)} ${member.assignment?.label}/s</div>`
     }
 
     html += "</div>"

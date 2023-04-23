@@ -6,6 +6,23 @@ export function formatNumberToString(value: number, decimals: number = 0, charLe
   // Round the value to the specified number of decimal places
   let roundedValue = value.toFixed(decimals);
 
+  // Check if the rounded value has only zeroes after the decimal point
+  if (decimals > 0) {
+    let decimalStr = roundedValue.split(".")[1];
+    if (decimalStr && parseFloat(decimalStr) === 0) {
+      // Find the minimum number of decimal places required to show some non-zero numbers
+      for (let i = decimals; i < 20; i++) {
+        let newRoundedValue = value.toFixed(i);
+        let newDecimalStr = newRoundedValue.split(".")[1];
+        if (newDecimalStr && parseFloat(newDecimalStr) !== 0) {
+          decimals = i;
+          roundedValue = newRoundedValue;
+          break;
+        }
+      }
+    }
+  }
+
   // Split the rounded value into its integer and fractional parts
   if (charLength > 0) {
     let [intPart, fracPart] = roundedValue.split(".");
@@ -23,6 +40,7 @@ export function formatNumberToString(value: number, decimals: number = 0, charLe
 
   return roundedValue;
 }
+
 
 export function convertTime(num: number): string {
   if (isNaN(num)) {
