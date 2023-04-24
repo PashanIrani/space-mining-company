@@ -10,7 +10,7 @@ export class PacingManger {
 
     this.introducedWindows = [];
 
-    let hideWindows = [this._resources.funds.name, 'store', this._resources.coffee.name, 'stats'];
+    let hideWindows = [this._resources.funds.name, 'store', this._resources.coffee.name, 'stats', 'staff'];
 
     for (let i = 0; i < hideWindows.length; i++) {
       if (this.introducedWindows.includes(hideWindows[i])) continue;

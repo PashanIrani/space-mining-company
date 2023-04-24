@@ -71,11 +71,14 @@ $text-color: #000000;
   background-color: white;
 }
 
-.staff-info-container {
-  padding: 5px;
+.staff-info-container,
+.staff-effect-container {
+  padding: 5px 10px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  border-right: 1px dotted grey;
+  width: 25%;
 }
 
 .staff-assignment-selector-container {

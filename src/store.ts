@@ -44,7 +44,7 @@ export class Store {
     Store.items[key].purchased = true;
     Store.items[key].onPurchase(Store.items[key]); // passing self to on purchase to allow that method to access anything it may need
     Store.items = { ...Store.items }; // to make setter run
-
+    this.reDraw();
   }
 
   static reDraw() {

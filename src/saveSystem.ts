@@ -1,13 +1,15 @@
 import { ALL_RESOURCES, staff } from ".";
+import { Cost } from "./cost";
 import { PacingManger } from "./pacingManager";
 import { GroupResource } from "./resource";
 import { StaffMember, TICKS_PER_SEC } from "./staff";
-import { Store } from "./store";
+import { Store, StoreItem } from "./store";
 import { Time } from "./time";
 
 const RESOURCES = "resources";
 const LAST_SAVE = "last_save_time";
 const STORE_ITEMS = "storeItems";
+const STORE_DATA = "storeData";
 const INTRODUCED_WINDOWS = "introducedWindows";
 const TIME = "timeData";
 const NEW_GAME_TIME = "newGametimeData";
@@ -134,13 +136,29 @@ export class SaveSystem {
 
   static saveStoreItems() {
     let purchasedItemsKeys = [];
+    let itemData: {
+      [key: string]:
+      {
+        costs: Cost[],
+        displayName: string,
+        level: number
+      }
+    } = {};
+
     for (const key in Store.items) {
       if (Store.items[key].purchased) {
         purchasedItemsKeys.push(key);
       }
+
+      itemData[key] = {
+        costs: Store.items[key].costs,
+        displayName: Store.items[key].displayName,
+        level: Store.items[key].level
+      }
     }
 
     localStorage.setItem(STORE_ITEMS, JSON.stringify(purchasedItemsKeys));
+    localStorage.setItem(STORE_DATA, JSON.stringify(itemData));
   }
 
   static loadStoreItems() {
@@ -154,8 +172,87 @@ export class SaveSystem {
       Store.items[purchasedItem].purchased = true;
     }
 
+    debugger
+    let storeDataString = localStorage.getItem(STORE_DATA);
+    if (storeDataString === null) return;
+
+    let storeData = JSON.parse(storeDataString);
+
+    for (const key in Store.items) {
+      Store.items[key].costs = storeData[key].costs;
+      Store.items[key].displayName = storeData[key].displayName;
+      Store.items[key].level = storeData[key].level;
+    }
+
     Store.reDraw();
   }
+
+
+  // static levelUp(keys: string[]) {
+
+  //   for (const str of keys) {
+  //     // Split string into non-numeric and numeric parts
+  //     const match = str.match(/^([^\d]*)(\d+)$/);
+  //     if (!match) {
+  //       continue;
+  //     }
+  //     const [_, key, levelString] = match;
+  //     let level = Number.parseInt(levelString);
+  //     console.log(`String: ${str}`);
+  //     console.log(`First part: ${key}`);
+  //     console.log(`Numeric part: ${level}`);
+
+
+  //     for (let i = 0; i < level; i++) {
+  //       switch (key) {
+  //         case 'funds-gen-':
+  //           genNextFundsLevelStoreItem();
+  //           break;
+  //         case 'labor-gen-':
+  //           genNextLaborLevelStoreItem();
+  //           break;
+  //       }
+
+  //     }
+
+  //   }
+
+
+  // }
+
+  // static filterUniqueStrings(arr: string[]): string[] {
+  //   const uniqueStrings = new Map<string, string>();
+
+  //   for (const str of arr) {
+  //     // Check if string contains a number
+  //     if (!/\d/.test(str)) {
+  //       continue;
+  //     }
+
+  //     // Split string into non-numeric and numeric parts
+  //     const match = str.match(/^([^\d]*)(\d+)$/);
+  //     if (!match) {
+  //       continue;
+  //     }
+  //     const [_, nonNumeric, numeric] = match;
+
+  //     // Check if uniqueStrings already contains a string with the same non-numeric part
+  //     const existingString = uniqueStrings.get(nonNumeric);
+  //     if (existingString) {
+  //       // Compare numeric parts and keep the highest one
+  //       const existingNumeric = parseInt(existingString.match(/\d+/)![0]);
+  //       const newNumeric = parseInt(numeric);
+  //       if (newNumeric > existingNumeric) {
+  //         uniqueStrings.set(nonNumeric, str);
+  //       }
+  //     } else {
+  //       uniqueStrings.set(nonNumeric, str);
+  //     }
+  //   }
+
+  //   return Array.from(uniqueStrings.values());
+  // }
+
 
   static saveIntroducedWindows() {
     localStorage.setItem(INTRODUCED_WINDOWS, JSON.stringify(PacingManger.introducedWindows));
@@ -224,6 +321,7 @@ export class SaveSystem {
     let data: any[] = [];
     staff.members.forEach(staff => {
       data.push({
+        id: staff.id,
         gender: staff.gender,
         name: staff.name,
         efficiency: staff.efficiency,
@@ -242,7 +340,7 @@ export class SaveSystem {
       let details: any[] = JSON.parse(savedMembers);
       let members: StaffMember[] = [];
       details.forEach(detail => {
-        members.push(new StaffMember(staff.onStaffMemberUpdate.bind(staff), detail.efficiency, detail.gender, detail.name, detail.assignment, detail.birthdate, detail.pic));
+        members.push(new StaffMember(detail.id, detail.efficiency, detail.gender, detail.name, detail.assignment, detail.birthdate, detail.pic));
       })
       staff.members = members;
     }

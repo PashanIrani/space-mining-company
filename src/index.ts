@@ -3,11 +3,25 @@ import { TIME_TICK_SPEED, Time } from './time'
 import './styles/index.scss';
 import { PacingManger } from "./pacingManager";
 import { Store, StoreItem } from "./store";
-import { UI_log } from "./ui";
+import { UI_log, UI_showWindow } from "./ui";
 import { SaveSystem } from "./saveSystem";
 import { StaffMember, StaffResource } from "./staff";
 
-const DEV = true;
+// Check game version, if not equal, alert and reset game to avoid error
+// TODO: Once game is in stable version, remove this.
+export const GAME_VERSION = 1;
+const savedVersion = localStorage.getItem('version');
+if (savedVersion != null && JSON.parse(savedVersion) != GAME_VERSION) {
+  alert("Game should will reset now since game versions don't match");
+  localStorage.clear();
+  location.reload();
+}
+
+const DEV: boolean = false;
+// save current version
+if (savedVersion == null) {
+  localStorage.setItem('version', JSON.stringify(GAME_VERSION));
+}
 
 if (!SaveSystem.loadLog()) {
   UI_log("Welcome to Space Mining Company!");
@@ -29,7 +43,7 @@ const labor = new Resource({
   name: 'labor',
   label: 'Labor',
   amount: 0,
-  generateAmount: 1,
+  generateAmount: DEV ? 100 : 1,
   capacity: 100,
   costs: [],
   timeToBuildMs: 100,
@@ -44,8 +58,8 @@ const coffee = new Resource({
   amount: 0,
   generateAmount: 1,
   capacity: 5,
-  costs: [{ resource: 'labor', amount: 1 }, { resource: 'funds', amount: 2 }],
-  timeToBuildMs: 5000,
+  costs: [{ resource: 'labor', amount: 2 }, { resource: 'funds', amount: 10 }],
+  timeToBuildMs: 10000,
   holdToGenerateAmount: 0,
   timeCost: 5,
   enabled: false,
@@ -54,7 +68,7 @@ const coffee = new Resource({
 const energyGroup = new GroupResource({
   name: 'energyGroup',
   label: 'Energy',
-  groupResources: [{ resource: labor, multiplier: 1 }, { resource: coffee, multiplier: 15 }]
+  groupResources: [{ resource: labor, multiplier: 1 }]
 });
 
 const funds = new Resource({
@@ -63,8 +77,8 @@ const funds = new Resource({
   amount: 0,
   generateAmount: 1,
   capacity: 1000,
-  costs: [{ resource: 'energyGroup', amount: 2 }],
-  timeToBuildMs: 12000,
+  costs: [{ resource: 'energyGroup', amount: 15 }],
+  timeToBuildMs: DEV ? 300 : 3000,
   enabled: false,
   timeCost: 10,
 });
@@ -75,10 +89,10 @@ export const staff = new StaffResource({
   amount: 0,
   generateAmount: 1,
   capacity: 5,
-  costs: [],
-  timeToBuildMs: 1000,
+  costs: [{ resource: 'funds', amount: 100 }],
+  timeToBuildMs: 35000,
   enabled: false,
-  timeCost: 500,
+  timeCost: 5000,
 });
 
 export const ALL_RESOURCES: AllResourceDefination = { labor, funds, coffee, energyGroup, staff };
@@ -91,7 +105,7 @@ const store = new Store({
   'enable-stats': {
     displayName: 'System Update',
     displayDescription: "Updates OS to show system stats.",
-    costs: [{ resource: 'energyGroup', amount: 15 }],
+    costs: [{ resource: 'energyGroup', amount: 100 }, { resource: 'funds', amount: 6 }],
     onPurchase: () => {
       PacingManger.showWindow('stats');
       UI_log('The system has been updated, and you are now able to access information about it.');
@@ -102,157 +116,74 @@ const store = new Store({
   'enable-hiring': {
     displayName: 'Recruit Help',
     displayDescription: "Will enable the ablity to hire.",
-    costs: [{ resource: 'energyGroup', amount: 1 }, { resource: 'funds', amount: 1 }],
+    costs: [{ resource: 'energyGroup', amount: 100 }, { resource: 'funds', amount: 200 }],
     onPurchase: () => {
-      // TODO
+      UI_showWindow('staff');
       UI_log("Recruitment program installed.");
     },
     purchased: false,
     dependsOn: 'enable-stats',
-  },
-  'profit1': {
-    displayName: 'Funds Boost',
-    displayDescription: "Doubles the amount of [funds] generated.",
-    costs: [{ resource: 'funds', amount: 10 }, { resource: 'energyGroup', amount: 25 }],
-    onPurchase: () => {
-      funds.generateAmount *= 2;
-    },
-    purchased: false,
-    dependsOn: null,
-    level: 1,
-  },
-  'profit2': {
-    displayName: 'Funds Boost (2)',
-    displayDescription: "Doubles the amount of [funds] generated.",
-    costs: [{ resource: 'funds', amount: 20 }, { resource: 'energyGroup', amount: 50 }],
-    onPurchase: () => {
-      funds.generateAmount *= 2;
-    },
-    purchased: false,
-    dependsOn: 'profit1',
-    level: 2,
-  },
-  'energy-enableHoldGeneration': {
+  }, 'energy-enableHoldGeneration': {
     displayName: 'Anti-Carpal Tunnel Cream',
-    displayDescription: "Allows for sustained holding of generation buttons. (4 clicks/sec)",
+    displayDescription: "Allows for sustained holding of generation buttons. (3 clicks/sec)",
     costs: [{ resource: 'funds', amount: 10 }, { resource: 'energyGroup', amount: 100 }],
     onPurchase: () => {
       for (const key in ALL_RESOURCES) {
         let resource = ALL_RESOURCES[key];
-        resource.holdToGenerateAmount = 4;
+        resource.holdToGenerateAmount = 2;
       }
     },
     purchased: false,
     dependsOn: 'enable-stats',
   },
-  'energy-enableHoldGeneration2': {
-    displayName: 'Super Anti-Carpal Tunnel Cream',
-    displayDescription: "Doubles the effect. (4 -> 8 clicks/sec)",
-    costs: [{ resource: 'funds', amount: 500 }, { resource: 'energyGroup', amount: 250 }],
-    onPurchase: () => {
-      for (const key in ALL_RESOURCES) {
-        let resource = ALL_RESOURCES[key];
-        resource.holdToGenerateAmount = 4;
-      }
+  'funds-gen': {
+    displayName: 'Funds Boost',
+    displayDescription: "Doubles the amount of [funds] generated.",
+    costs: [{ resource: 'funds', amount: 5 }, { resource: 'energyGroup', amount: 25 }],
+    onPurchase: (self: StoreItem) => {
+      funds.generateAmount *= 2;
+      self.level += 1;
+      self.displayName = `Funds Boost (${self.level})`;
+      self.costs[0].amount *= 1.2;
+      self.costs[1].amount *= 1.2;
+      self.purchased = false;
     },
     purchased: false,
-    dependsOn: 'increase-labor-generationAmount',
+    dependsOn: 'enable-stats',
+    level: 0,
   },
-  'increase-labor-generationAmount': {
+  'labor-genAmount': {
     displayName: 'Amplify Labor',
     displayDescription: "Doubles the amount of [labor] generated.",
-    costs: [{ resource: 'funds', amount: 100 }, { resource: 'energyGroup', amount: 100 }],
-    onPurchase: () => {
+    costs: [{ resource: 'funds', amount: 10 }, { resource: 'energyGroup', amount: 50 }],
+    onPurchase: (self: StoreItem) => {
       labor.generateAmount *= 2;
+      self.level += 1;
+      self.displayName = `Amplify Labor Boost (${self.level})`;
+      self.costs[0].amount *= 1.2;
+      self.costs[1].amount *= 1.2;
+      self.purchased = false;
     },
     purchased: false,
     dependsOn: 'enable-stats',
-  }, 'increase-labor-generationAmount2': {
-    displayName: 'Amplify Labor (2)',
-    displayDescription: "Doubles the amount of [labor] generated.",
-    costs: [{ resource: 'funds', amount: 250 }, { resource: 'energyGroup', amount: 200 }],
-    onPurchase: () => {
-      labor.generateAmount *= 2;
-    },
-    purchased: false,
-    dependsOn: 'increase-labor-generationAmount',
-  }, 'increase-labor-generationAmount3': {
-    displayName: 'Amplify Labor (3)',
-    displayDescription: "Doubles the amount of [labor] generated.",
-    costs: [{ resource: 'funds', amount: 500 }, { resource: 'energyGroup', amount: 750 }],
-    onPurchase: () => {
-      labor.generateAmount *= 2;
-    },
-    purchased: false,
-    dependsOn: 'increase-labor-generationAmount2',
   },
   'enableCoffee': {
     displayName: 'Coffee Machine',
     displayDescription: "Purchase a coffee machine. Enables generation of [coffee].",
     costs: [{ resource: 'funds', amount: 50 }, { resource: 'energyGroup', amount: 100 }],
-    onPurchase: () => {
+    onPurchase: (self: StoreItem) => {
       coffee.enabled = true;
       PacingManger.showWindow(coffee.name);
       energyGroup.drawCompositionDetails();
+      self.level += 1;
+      self.displayName = `Coffee Machine (${self.level})`;
+      self.costs[0].amount *= 1.2;
+      self.costs[1].amount *= 1.2;
+      self.purchased = false;
       UI_log("Coffee Machine Purchased!");
     },
     purchased: false,
     dependsOn: null,
-  },
-  'coffee-capacity1': {
-    displayName: 'Coffee Enjoyer',
-    displayDescription: "Become a coffee enjoyer. Increases capacity of [coffee] to 10.",
-    costs: [{ resource: 'energyGroup', amount: 175 }],
-    onPurchase: () => {
-      coffee.capacity = 10;
-    },
-    purchased: false,
-    dependsOn: 'enableCoffee',
-  }, 'coffee-capacity2': {
-    displayName: 'Coffee Enthusiast',
-    displayDescription: "Become a coffee enthusiast. Increases capacity of [coffee] to 20.",
-    costs: [{ resource: 'energyGroup', amount: 250 }],
-    onPurchase: () => {
-      coffee.capacity = 20;
-    },
-    purchased: false,
-    dependsOn: 'coffee-capacity1',
-  }, 'coffee-capacity3': {
-    displayName: 'Coffee Addict',
-    displayDescription: "Become a coffee enthusiast. Increases capacity of [coffee] to 40.",
-    costs: [{ resource: 'energyGroup', amount: 400 }],
-    onPurchase: () => {
-      coffee.capacity = 40;
-    },
-    purchased: false,
-    dependsOn: 'coffee-capacity2',
-  }, 'coffee-capacity4': {
-    displayName: 'Coffeeholic',
-    displayDescription: "Become a Coffeeholic. Increases capacity of [coffee] to 60.",
-    costs: [{ resource: 'energyGroup', amount: 700 }],
-    onPurchase: () => {
-      coffee.capacity = 60;
-    },
-    purchased: false,
-    dependsOn: 'coffee-capacity3',
-  }, 'coffee-capacity5': {
-    displayName: 'Java Junkie',
-    displayDescription: "Become a Java Junkie. Increases capacity of [coffee] to 80.",
-    costs: [{ resource: 'energyGroup', amount: 1000 }],
-    onPurchase: () => {
-      coffee.capacity = 80;
-    },
-    purchased: false,
-    dependsOn: 'coffee-capacity4',
-  }, 'coffee-capacity6': {
-    displayName: 'Coffee Pot',
-    displayDescription: "Become a walking, talking coffee pot. Increases capacity of [coffee] to 100.",
-    costs: [{ resource: 'energyGroup', amount: 1300 }],
-    onPurchase: () => {
-      coffee.capacity = 100;
-    },
-    purchased: false,
-    dependsOn: 'coffee-capacity5',
   }
 });
 

@@ -11,7 +11,7 @@ export function formatNumberToString(value: number, decimals: number = 0, charLe
     let decimalStr = roundedValue.split(".")[1];
     if (decimalStr && parseFloat(decimalStr) === 0) {
       // Find the minimum number of decimal places required to show some non-zero numbers
-      for (let i = decimals; i < 20; i++) {
+      for (let i = decimals; i < 8; i++) {
         let newRoundedValue = value.toFixed(i);
         let newDecimalStr = newRoundedValue.split(".")[1];
         if (newDecimalStr && parseFloat(newDecimalStr) !== 0) {

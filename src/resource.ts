@@ -138,7 +138,7 @@ export class Resource {
       }
 
 
-      UI_displayText(this.name, 'rate', `${rate > 0 ? '+' : ''}${formatNumberToString(rate, 2)}/s ${timeLeftText != null ? `(${timeLeftText})` : ''}`);
+      UI_displayText(this.name, 'rate', `${rate > 0 ? '+' : ''}${formatNumberToString(rate, 3)}/s ${timeLeftText != null ? `(${timeLeftText})` : ''}`);
       prevValue = this.amount;
     }, 1000);
   }

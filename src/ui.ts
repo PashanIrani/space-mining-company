@@ -58,7 +58,8 @@ let lastStoreState: {
   [key: string]: {
     disbaled: boolean,
     cost: string,
-    visible: boolean
+    visible: boolean,
+    name: string,
   }
 } = null;
 
@@ -72,7 +73,7 @@ export function UI_drawStore(storeItems: StoreDefination) {
     container.innerHTML = '';
     lastStoreState = {};
     for (const key in storeItems) {
-      lastStoreState[key] = { visible: false, cost: '', disbaled: false };
+      lastStoreState[key] = { visible: false, cost: '', disbaled: false, name: '' };
 
       if (storeItems[key].purchased) continue;
       if (storeItems[key].dependsOn && !storeItems[storeItems[key].dependsOn]?.purchased) continue; // if dependsOn has not been purchased, skip
@@ -93,7 +94,9 @@ export function UI_drawStore(storeItems: StoreDefination) {
       itemInfoContainer.classList.add('store-item-info');
 
       const nameElement = document.createElement('p');
+      nameElement.id = `${key}-name`;
       nameElement.innerHTML = `<b>${storeItems[key].displayName}</b>`;
+      lastStoreState[key].name = storeItems[key].displayName;
 
       const descriptionElement = document.createElement('p');
       descriptionElement.textContent = storeItems[key].displayDescription;
@@ -133,6 +136,14 @@ export function UI_drawStore(storeItems: StoreDefination) {
       if (lastStoreState[key].visible != isVisble) {
         lastStoreState = null;
         break;
+      }
+
+      if (lastStoreState[key].name != storeItems[key].displayName) {
+        lastStoreState[key].name = storeItems[key].displayName;
+        let nameElement = document.getElementById(`${key}-name`);
+        if (nameElement) {
+          nameElement.innerHTML = `<b>${storeItems[key].displayName}</b>`
+        }
       }
 
       let costString = Cost_getCostDisplayString(storeItems[key].costs);
@@ -193,16 +204,13 @@ export function UI_displayStaffMembers(members: StaffMember[]) {
     html += `<div class="face-container"><div class="face">${member.pic}</div></div>`;
     html += `<div class="staff-info-container">`;
     html += `<div> ${i + 1}. ${member.name.firstName} ${member.name.lastName} (${member.gender == 0 ? '♂' : member.gender == 1 ? '♀' : '⚥'})</div>`
-    html += `<div>Age: ${member.age}</div>`
-    html += `<div>Efficiency: ${member.efficiency * 100}%</div>`
+    html += `<div>Age: <span class="staff-member-${member.id}-age"></span></div>`
+    html += `<div>Efficiency: <span class="staff-member-${member.id}-efficiency"></span></div>`
 
-    html += `<div>Contribution: `;
-    if (member.genRatePerSec == 0) {
-      html += "none</div>"
-    } else {
-      html += `${member.genRatePerSec > 0 ? "+" : '-'}${formatNumberToString(member.genRatePerSec, 3)} ${member.assignment?.label}/s</div>`
-    }
-
+    html += "</div>"
+    html += `<div class="staff-effect-container">`
+    html += `<div>Contribution: <span class="staff-member-${member.id}-gen-rate"></span></div>`;
+    html += `<div>Impact: <span class="staff-member-${member.id}-spend-rate"></span></div>`;
     html += "</div>"
     html += `<div class="staff-assignment-selector-container">`
     html += `<select id="staff-job-${i}">`
@@ -230,7 +238,9 @@ export function UI_displayStaffMembers(members: StaffMember[]) {
     const dropdown = document.getElementById(`staff-job-${i}`) as HTMLSelectElement;
     dropdown.addEventListener('change', () => {
       handleStaffJobChange(dropdown.value, member);
+      UI_displayStaffMembers(members);
     });
+    member.UI_triggerUpdate();
   }
 }
 
