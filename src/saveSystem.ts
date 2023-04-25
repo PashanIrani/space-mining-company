@@ -172,7 +172,6 @@ export class SaveSystem {
       Store.items[purchasedItem].purchased = true;
     }
 
-    debugger
     let storeDataString = localStorage.getItem(STORE_DATA);
     if (storeDataString === null) return;
 

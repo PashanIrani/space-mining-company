@@ -13,8 +13,9 @@ export class StaffResource extends Resource {
   private _members: StaffMember[] = [];
 
   public build(amount: number = this.generateAmount) {
-    this.members.push(new StaffMember(this.onStaffMemberUpdate.bind(this), 0.1));
+    this.members.push(new StaffMember(this.members.length, randomIntFromInterval(10, 60) / 100));
     this.members = [...this.members];
+    debugger
     super.build(amount);
   }
 
@@ -107,6 +108,7 @@ export class StaffMember {
   private _spendRatePerSec: Cost[] = [];
 
   constructor(id: number, efficiency: number = 1, gender: number = genGender(), name: StaffName = null, assignment: string = null, birthDate: StaffBirthDate = Time.generateDay(), pic: string = generateRandomLennyFace()) {
+    debugger
     this.id = id;
     this.gender = gender;
     this.name = name || { firstName: genFirstName(this.gender), lastName: genLastName() };

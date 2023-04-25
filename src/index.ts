@@ -76,7 +76,7 @@ const funds = new Resource({
   label: 'Funds',
   amount: 0,
   generateAmount: 1,
-  capacity: 1000,
+  capacity: 10,
   costs: [{ resource: 'energyGroup', amount: 15 }],
   timeToBuildMs: DEV ? 300 : 3000,
   enabled: false,
@@ -89,10 +89,10 @@ export const staff = new StaffResource({
   amount: 0,
   generateAmount: 1,
   capacity: 5,
-  costs: [{ resource: 'funds', amount: 100 }],
-  timeToBuildMs: 35000,
+  costs: [{ resource: 'funds', amount: DEV ? 1 : 100 }],
+  timeToBuildMs: DEV ? 350 : 35000,
   enabled: false,
-  timeCost: 5000,
+  timeCost: 5,
 });
 
 export const ALL_RESOURCES: AllResourceDefination = { labor, funds, coffee, energyGroup, staff };
@@ -116,7 +116,7 @@ const store = new Store({
   'enable-hiring': {
     displayName: 'Recruit Help',
     displayDescription: "Will enable the ablity to hire.",
-    costs: [{ resource: 'energyGroup', amount: 100 }, { resource: 'funds', amount: 200 }],
+    costs: [{ resource: 'energyGroup', amount: DEV ? 1 : 100 }, { resource: 'funds', amount: DEV ? 2 : 200 }],
     onPurchase: () => {
       UI_showWindow('staff');
       UI_log("Recruitment program installed.");
@@ -159,6 +159,7 @@ const store = new Store({
     onPurchase: (self: StoreItem) => {
       labor.generateAmount *= 2;
       self.level += 1;
+      debugger
       self.displayName = `Amplify Labor Boost (${self.level})`;
       self.costs[0].amount *= 1.2;
       self.costs[1].amount *= 1.2;
@@ -166,6 +167,7 @@ const store = new Store({
     },
     purchased: false,
     dependsOn: 'enable-stats',
+    level: 0
   },
   'enableCoffee': {
     displayName: 'Coffee Machine',
@@ -183,7 +185,8 @@ const store = new Store({
       UI_log("Coffee Machine Purchased!");
     },
     purchased: false,
-    dependsOn: null,
+    dependsOn: 'enable-hiring',
+    level: 0
   }
 });
 
