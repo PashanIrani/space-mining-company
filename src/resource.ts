@@ -278,12 +278,18 @@ export class Resource {
 
     let queueString = '';
     if (this.buildQueue.length > 1) {
-      queueString = ` +${this.buildQueue.length - 1}`
+      queueString = `(${this.buildQueue.length})`
     }
+
+    let itemOverflowText = '';
+    if (this.amount + this.buildQueue[0] > this.capacity) {
+      itemOverflowText = 'Overflow Error!'
+    }
+
     if (this.buildStatus == 0) {
       UI_displayText(this.name, 'buildStatus', '');
     } else {
-      UI_displayText(this.name, 'buildStatus', `[${formatNumberToString(Math.round(this.buildStatus * 100), 0, -1)}%${queueString}]`);
+      UI_displayText(this.name, 'buildStatus', `+${formatNumberToString(this.buildQueue[0], 2)} [${formatNumberToString(Math.round(this.buildStatus * 100), 0, -1)}%] ${queueString} ${itemOverflowText}`);
     }
   }
 

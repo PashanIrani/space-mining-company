@@ -6,7 +6,7 @@ const MAX_MINUTE = 59;
 const MAX_HOUR = 23;
 const MAX_MONTH = 12;
 
-export const TIME_TICK_SPEED = 1000 * 5; // 8 Mins per day
+export const TIME_TICK_SPEED = 1000 * 0.2083; // 5 Mins per day
 export class Time {
   static _minute: number;
   static _hour: number;

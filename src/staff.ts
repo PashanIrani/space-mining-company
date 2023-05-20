@@ -15,7 +15,6 @@ export class StaffResource extends Resource {
   public build(amount: number = this.generateAmount) {
     this.members.push(new StaffMember(this.members.length, randomIntFromInterval(10, 60) / 100));
     this.members = [...this.members];
-    debugger
     super.build(amount);
   }
 
@@ -108,7 +107,6 @@ export class StaffMember {
   private _spendRatePerSec: Cost[] = [];
 
   constructor(id: number, efficiency: number = 1, gender: number = genGender(), name: StaffName = null, assignment: string = null, birthDate: StaffBirthDate = Time.generateDay(), pic: string = generateRandomLennyFace()) {
-    debugger
     this.id = id;
     this.gender = gender;
     this.name = name || { firstName: genFirstName(this.gender), lastName: genLastName() };
@@ -136,7 +134,8 @@ export class StaffMember {
 
   perTickAction(): void {
     if (this.assignment instanceof Resource) {
-      let totalTickIncludingTimeToBuild = this.assignment.timeToBuildMs > 0 ? TICKS_PER_SEC * (this.assignment.timeToBuildMs / 1000) : TICKS_PER_SEC;
+      let totalSecs = this.assignment.timeToBuildMs < 1000 ? 1 : this.assignment.timeToBuildMs / 1000;
+      let totalTickIncludingTimeToBuild = TICKS_PER_SEC * totalSecs;
 
       // Check if should generate
       let cantAfford = !Resource_canAffordGeneration(this.assignment.costs, this.efficiency, totalTickIncludingTimeToBuild);

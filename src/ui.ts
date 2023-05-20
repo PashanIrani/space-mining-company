@@ -194,7 +194,6 @@ export function UI_shakeScreen(times = 5) {
 
 
 export function UI_displayStaffMembers(members: StaffMember[]) {
-  debugger
   let staffListContainer = document.getElementById("staff-list-container");
   let html = ""
   html = `<div class="staff-container">`;

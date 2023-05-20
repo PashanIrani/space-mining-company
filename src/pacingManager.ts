@@ -29,7 +29,7 @@ export class PacingManger {
       this._resources.funds.enabled = true;
     }
 
-    if (this._resources.funds.amount >= 5) {
+    if (this._resources.funds.amount >= 2) {
       this.showWindow('store');
     }
   }

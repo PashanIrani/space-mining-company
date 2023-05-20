@@ -117,7 +117,7 @@ export class SaveSystem {
 
     for (const key in resourceData) {
       // Calculate how much of the Build Queue is completed
-      this.advanceBuildQueue(resourceData[key], this.getOfflineMs());
+      // this.advanceBuildQueue(resourceData[key], this.getOfflineMs());
 
       // Add data to game
       ALL_RESOURCES[key].capacity = resourceData[key].capacity;
@@ -185,72 +185,6 @@ export class SaveSystem {
 
     Store.reDraw();
   }
-
-
-  // static levelUp(keys: string[]) {
-
-  //   for (const str of keys) {
-  //     // Split string into non-numeric and numeric parts
-  //     const match = str.match(/^([^\d]*)(\d+)$/);
-  //     if (!match) {
-  //       continue;
-  //     }
-  //     const [_, key, levelString] = match;
-  //     let level = Number.parseInt(levelString);
-  //     console.log(`String: ${str}`);
-  //     console.log(`First part: ${key}`);
-  //     console.log(`Numeric part: ${level}`);
-
-
-  //     for (let i = 0; i < level; i++) {
-  //       switch (key) {
-  //         case 'funds-gen-':
-  //           genNextFundsLevelStoreItem();
-  //           break;
-  //         case 'labor-gen-':
-  //           genNextLaborLevelStoreItem();
-  //           break;
-  //       }
-
-  //     }
-
-  //   }
-
-
-  // }
-
-  // static filterUniqueStrings(arr: string[]): string[] {
-  //   const uniqueStrings = new Map<string, string>();
-
-  //   for (const str of arr) {
-  //     // Check if string contains a number
-  //     if (!/\d/.test(str)) {
-  //       continue;
-  //     }
-
-  //     // Split string into non-numeric and numeric parts
-  //     const match = str.match(/^([^\d]*)(\d+)$/);
-  //     if (!match) {
-  //       continue;
-  //     }
-  //     const [_, nonNumeric, numeric] = match;
-
-  //     // Check if uniqueStrings already contains a string with the same non-numeric part
-  //     const existingString = uniqueStrings.get(nonNumeric);
-  //     if (existingString) {
-  //       // Compare numeric parts and keep the highest one
-  //       const existingNumeric = parseInt(existingString.match(/\d+/)![0]);
-  //       const newNumeric = parseInt(numeric);
-  //       if (newNumeric > existingNumeric) {
-  //         uniqueStrings.set(nonNumeric, str);
-  //       }
-  //     } else {
-  //       uniqueStrings.set(nonNumeric, str);
-  //     }
-  //   }
-
-  //   return Array.from(uniqueStrings.values());
-  // }
 
 
   static saveIntroducedWindows() {
@@ -344,7 +278,7 @@ export class SaveSystem {
       staff.members = members;
     }
 
-    this.advanceStaffWork(this.getOfflineMs());
+    // this.advanceStaffWork(this.getOfflineMs());
   }
 
   static isNewGame(): boolean {
