@@ -1,5 +1,5 @@
 import { formatNumberToString } from "./helpers";
-import { UI_displayText } from "./ui";
+import { UI_displayText, UI_calculateSunBrightness } from "./ui";
 
 const DAYS_PER_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 const MAX_MINUTE = 59;
@@ -103,9 +103,11 @@ export class Time {
 
   static tick() {
     this.minute++;
+    UI_calculateSunBrightness(this.hour, this.minute);
   }
 
   static startTime() {
+    UI_calculateSunBrightness(this.hour, this.month);
     setInterval(this.tick.bind(this), TIME_TICK_SPEED);
   }
 
@@ -207,5 +209,3 @@ export class Time {
   }
 
 }
-
-

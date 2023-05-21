@@ -69,6 +69,7 @@ $text-color: #000000;
   padding: 5px;
   font-size: 12px;
   background-color: white;
+  font-weight: bold;
 }
 
 .staff-info-container,
@@ -289,4 +290,12 @@ fieldset {
 span.cost-cant-afford {
   color: red;
   opacity: 0.85;
+}
+
+#sun-graphic {
+  background-color: yellow;
+  border: 1px solid black;
+  width: 5px;
+  height: 5px;
+  border-radius: 5px;
 }

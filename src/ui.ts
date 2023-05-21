@@ -64,15 +64,25 @@ let lastStoreState: {
 } = null;
 
 export function UI_drawStore(storeItems: StoreDefination) {
-  const container = document.getElementById("store-content-container");
 
-  if (!container) return;
 
   // Draw First Time
   if (lastStoreState == null) {
-    container.innerHTML = '';
     lastStoreState = {};
+
+    // clear all containers
     for (const key in storeItems) {
+      const container = document.getElementById(`${key.split('-')[0]}-store-content-container`);
+      if (!container) continue;
+      container.innerHTML = '';
+    }
+
+    for (const key in storeItems) {
+
+      const container = document.getElementById(`${key.split('-')[0]}-store-content-container`);
+      console.log(`${key.split('-')[0]}-store-content-container`, container);
+
+      if (!container) continue;
       lastStoreState[key] = { visible: false, cost: '', disbaled: false, name: '' };
 
       if (storeItems[key].purchased) continue;
@@ -130,6 +140,9 @@ export function UI_drawStore(storeItems: StoreDefination) {
     }
   } else {
     for (const key in storeItems) {
+      const container = document.getElementById(`${key.split('-')[0]}-store-content-container`);
+      if (!container) continue;
+
       let isVisble: boolean = true;
       if (storeItems[key].purchased) isVisble = false;
       if (storeItems[key].dependsOn && !storeItems[storeItems[key].dependsOn]?.purchased) isVisble = false;
@@ -244,6 +257,28 @@ export function UI_displayStaffMembers(members: StaffMember[]) {
   }
 }
 
+export function UI_calculateSunBrightness(hour: number, minute: number) {
+  var totalMinutes = (hour * 60) + minute;
+
+  const totalMinutesInDay = (23 * 60) + 59;
+  let dayPercentage = totalMinutes / totalMinutesInDay;
+
+  let sunBrightness = (0.5 * (Math.sin((dayPercentage * 2 * Math.PI) + (Math.PI / 2)) + 1))
+
+  // document.body.style.filter = "grayscale(" + (sunBrightness * 0.4) + ")";
+  // Define the start and end colors
+  var startColor = [1, 1, 1]; // RGB values for #3c6ea5
+  var endColor = [60, 110, 165]; // RGB values for #010101
+
+  // Calculate the intermediate color values
+  var r = Math.round(startColor[0] * sunBrightness + endColor[0] * (1 - sunBrightness));
+  var g = Math.round(startColor[1] * sunBrightness + endColor[1] * (1 - sunBrightness));
+  var b = Math.round(startColor[2] * sunBrightness + endColor[2] * (1 - sunBrightness));
+
+  // Set the background color of the body element
+  document.body.style.backgroundColor = "rgb(" + r + ", " + g + ", " + b + ")";
+}
+
 function handleStaffJobChange(resourceType: string, staffMember: StaffMember) {
   console.log(`Assigning ${resourceType} job to ${staffMember.name.firstName} ${staffMember.name.lastName}`);
   staffMember.assignment = ALL_RESOURCES[resourceType];
@@ -268,3 +303,4 @@ function doGlitchEffect(count: number) {
     doGlitchEffect(count - 1)
   }, randomInterval);
 }
+

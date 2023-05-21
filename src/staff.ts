@@ -13,7 +13,7 @@ export class StaffResource extends Resource {
   private _members: StaffMember[] = [];
 
   public build(amount: number = this.generateAmount) {
-    this.members.push(new StaffMember(this.members.length, randomIntFromInterval(10, 60) / 100));
+    this.members.push(new StaffMember(this.members.length, randomIntFromInterval(1, 40) / 100));
     this.members = [...this.members];
     super.build(amount);
   }
@@ -93,6 +93,7 @@ function calculateAge(birthDate: StaffBirthDate) {
   return age;
 }
 
+export enum StaffAction { PROCASTINATE, WORKING, REST, EAT };
 
 export class StaffMember {
   public id: number;
@@ -105,6 +106,8 @@ export class StaffMember {
   private _pic: string;
   private _genRatePerSec: number;
   private _spendRatePerSec: Cost[] = [];
+  private _currentAction: StaffAction;
+  private _sallary: Cost;
 
   constructor(id: number, efficiency: number = 1, gender: number = genGender(), name: StaffName = null, assignment: string = null, birthDate: StaffBirthDate = Time.generateDay(), pic: string = generateRandomLennyFace()) {
     this.id = id;
@@ -115,7 +118,7 @@ export class StaffMember {
     this.birthDate = birthDate;
     this.age = calculateAge(this.birthDate);
     this.genRatePerSec = 0;
-
+    this.sallary = { resource: 'funds', amount: randomIntFromInterval(40, 125) }
 
     this.pic = pic;
     this.begin();
@@ -133,6 +136,7 @@ export class StaffMember {
   }
 
   perTickAction(): void {
+
     if (this.assignment instanceof Resource) {
       let totalSecs = this.assignment.timeToBuildMs < 1000 ? 1 : this.assignment.timeToBuildMs / 1000;
       let totalTickIncludingTimeToBuild = TICKS_PER_SEC * totalSecs;
@@ -178,6 +182,14 @@ export class StaffMember {
 
   set assignment(value: Resource) {
     this._assignment = value;
+  }
+
+  get sallary(): Cost {
+    return this._sallary;
+  }
+
+  set sallary(value: Cost) {
+    this._sallary = value;
   }
 
   get pic(): string {
