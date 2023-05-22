@@ -71,3 +71,15 @@ export function convertTime(num: number): string {
   const secs = num % 60;
   return `${formatNumberToString(days)}d ${formatNumberToString(hours)}h ${formatNumberToString(mins)}m ${formatNumberToString(secs)}s`;
 }
+
+export function generateRandom4LetterString() {
+  var characters = 'abcdefghijklmnopqrstuvwxyz';
+  var result = '';
+
+  for (var i = 0; i < 4; i++) {
+    var randomIndex = Math.floor(Math.random() * characters.length);
+    result += characters.charAt(randomIndex);
+  }
+
+  return result;
+}

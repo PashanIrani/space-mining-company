@@ -206,7 +206,7 @@ export function UI_shakeScreen(times = 5) {
 }
 
 
-export function UI_displayStaffMembers(members: StaffMember[]) {
+export function UI_displayStaffMembers(members: StaffMember[], onFireCallback: Function) {
   let staffListContainer = document.getElementById("staff-list-container");
   let html = ""
   html = `<div class="staff-container">`;
@@ -226,7 +226,8 @@ export function UI_displayStaffMembers(members: StaffMember[]) {
     html += `<div>Impact: <span class="staff-member-${member.id}-spend-rate"></span></div>`;
     html += "</div>"
     html += `<div class="staff-assignment-selector-container">`
-    html += `<select id="staff-job-${i}">`
+    html += `<button id="staff-fire-button-${member.id}">FIRE</button>`
+    html += `<select id="staff-job-${member.id}">`
     html += `<option value="null">---</option>`
     WorkableResourceList.forEach(r => {
       if (ALL_RESOURCES[r].enabled) {
@@ -248,10 +249,16 @@ export function UI_displayStaffMembers(members: StaffMember[]) {
   // Add event listeners to each dropdown
   for (let i = 0; i < members.length; i++) {
     const member = members[i];
-    const dropdown = document.getElementById(`staff-job-${i}`) as HTMLSelectElement;
+    const dropdown = document.getElementById(`staff-job-${member.id}`) as HTMLSelectElement;
     dropdown.addEventListener('change', () => {
       handleStaffJobChange(dropdown.value, member);
-      UI_displayStaffMembers(members);
+      UI_displayStaffMembers(members, onFireCallback);
+    });
+
+    const fireButton = document.getElementById(`staff-fire-button-${member.id}`);
+    fireButton.addEventListener('click', () => {
+      onFireCallback(member.id);
+      UI_log(`${member.name.firstName} ${member.name.lastName} as been relieved of ${member.gender == 0 ? 'his' : member.gender == 1 ? 'her' : 'their'} services.`)
     });
     member.UI_triggerUpdate();
   }

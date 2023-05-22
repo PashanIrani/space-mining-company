@@ -1,10 +1,10 @@
 import { ALL_RESOURCES } from ".";
 import { Cost } from "./cost";
-import { formatNumberToString, randomIntFromInterval } from "./helpers";
+import { formatNumberToString, generateRandom4LetterString, randomIntFromInterval } from "./helpers";
 import { femaleNames, lastNames, maleNames } from "./names";
 import { Resource, Resource_canAffordGeneration, Resource_performCostTransaction } from "./resource";
 import { Time } from "./time";
-import { UI_displayStaffMembers, UI_displayText } from './ui'
+import { UI_displayStaffMembers, UI_displayText, UI_log } from './ui'
 
 export const STAFF_TICK_FREQ_MS = 100;
 
@@ -13,9 +13,21 @@ export class StaffResource extends Resource {
   private _members: StaffMember[] = [];
 
   public build(amount: number = this.generateAmount) {
-    this.members.push(new StaffMember(this.members.length, randomIntFromInterval(1, 40) / 100));
+    if (amount != 1) throw new Error("Amount Should be 1 not " + amount);
+    this.members.push(new StaffMember(generateRandom4LetterString(), randomIntFromInterval(1, 40) / 100));
     this.members = [...this.members];
     super.build(amount);
+  }
+
+  public remove(id: string) {
+    this.members = this.members.filter(member => {
+      if (member.id === id) {
+        member.fire();
+        return false;
+      }
+      return true;
+    });
+    this.amount = this.members.length;
   }
 
   get members(): StaffMember[] {
@@ -25,20 +37,20 @@ export class StaffResource extends Resource {
   set members(value: StaffMember[]) {
     this._members = value;
 
-    UI_displayStaffMembers(value);
+    this.onStaffMemberUpdate();
   }
 
   onStaffMemberUpdate() {
-    UI_displayStaffMembers(this._members);
+    UI_displayStaffMembers(this._members, this.remove.bind(this));
   }
 }
 
 function genGender() {
   const prob = Math.random();
 
-  let gender = 0;
-  if (prob >= 0.4) gender = 1;
-  if (prob >= 0.8) gender = 2;
+  let gender = 0; // Male
+  if (prob >= 0.4) gender = 1; // Female
+  if (prob >= 0.8) gender = 2; // Other
 
   return gender;
 }
@@ -96,7 +108,7 @@ function calculateAge(birthDate: StaffBirthDate) {
 export enum StaffAction { PROCASTINATE, WORKING, REST, EAT };
 
 export class StaffMember {
-  public id: number;
+  public id: string;
   private _assignment: Resource;
   private _efficiency: number;
   public gender: number;
@@ -109,7 +121,9 @@ export class StaffMember {
   private _currentAction: StaffAction;
   private _sallary: Cost;
 
-  constructor(id: number, efficiency: number = 1, gender: number = genGender(), name: StaffName = null, assignment: string = null, birthDate: StaffBirthDate = Time.generateDay(), pic: string = generateRandomLennyFace()) {
+  private perTickInterval: NodeJS.Timeout;
+
+  constructor(id: string, efficiency: number = 1, gender: number = genGender(), name: StaffName = null, assignment: string = null, birthDate: StaffBirthDate = Time.generateDay(), pic: string = generateRandomLennyFace()) {
     this.id = id;
     this.gender = gender;
     this.name = name || { firstName: genFirstName(this.gender), lastName: genLastName() };
@@ -125,7 +139,7 @@ export class StaffMember {
   }
 
   private begin() {
-    setInterval(() => {
+    this.perTickInterval = setInterval(() => {
       this.perTickAction();
 
     }, STAFF_TICK_FREQ_MS);
@@ -133,6 +147,10 @@ export class StaffMember {
     setInterval(() => {
       // this.age = calculateAge(this.birthDate);
     }, 2500);
+  }
+
+  public fire() {
+    clearInterval(this.perTickInterval);
   }
 
   perTickAction(): void {
