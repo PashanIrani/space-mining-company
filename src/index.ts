@@ -48,7 +48,8 @@ const labor = new Resource({
   costs: [],
   timeToBuildMs: 100,
   holdToGenerateAmount: 0,
-  enabled: true
+  enabled: true,
+  buildDescriptions: ['Working']
 });
 
 const coffee = new Resource({
@@ -78,6 +79,7 @@ const funds = new Resource({
   costs: [{ resource: 'energyGroup', amount: 15 }],
   timeToBuildMs: DEV ? 300 : 3000,
   enabled: false,
+  buildDescriptions: ['Analyzing Market', 'Executing Plan', 'Generating Funds']
 });
 
 export const staff = new StaffResource({
@@ -87,8 +89,14 @@ export const staff = new StaffResource({
   generateAmount: 1,
   capacity: 5,
   costs: [{ resource: 'funds', amount: DEV ? 1 : 50 }],
-  timeToBuildMs: DEV ? 350 : 10000,
+  timeToBuildMs: DEV ? 350 : 30000,
   enabled: false,
+  buildDescriptions: ['Recruitment: Advertising', 'Recruitment: Receiving', 'Recruitment: Reviewing',
+    'Screening: Assessing', 'Screening: Evaluating', 'Screening: Shortlisting',
+    'Interview: Questioning', 'Interview: Engaging', 'Interview: Assessing',
+    'Evaluate: Analyzing', 'Evaluate: Comparing', 'Evaluate: Selecting',
+    'Negotiate: Discussing', 'Negotiate: Bargaining', 'Negotiate: Finalizing',
+    'Onboard: Welcoming', 'Onboard: Orienting', 'Onboard: Integrating']
 });
 
 export const ALL_RESOURCES: AllResourceDefination = { labor, funds, coffee, energyGroup, staff };

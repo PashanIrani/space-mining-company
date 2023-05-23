@@ -17,6 +17,7 @@ export interface ResourceDefination {
   holdToGenerateAmount?: number;
   timeCost?: number; // amount of time incremented per generation
   enabled: boolean; // true is resource has been introduced to player, false if not
+  buildDescriptions?: string[]; // a description of the build
 }
 
 export type AllResourceDefination = { [key: string]: Resource };
@@ -69,6 +70,8 @@ export class Resource {
   private _ratePerSec: number;
   private _holdToGenerateAmount: number;
 
+  private _buildDescriptions: string[];
+
   private _timeCost: number;
   private _enabled: boolean;
 
@@ -94,6 +97,8 @@ export class Resource {
     this.holdToGenerateAmount = defination.holdToGenerateAmount || 0;
     this.timeCost = defination.timeCost || 0;
     this.enabled = defination.enabled;
+
+    this._buildDescriptions = defination.buildDescriptions || null;
 
     this.assignEventListeners();
     this.initRateCalculation();
@@ -286,10 +291,20 @@ export class Resource {
       itemOverflowText = 'Overflow Error!'
     }
 
+    let currentBuildDescription = '';
+    let bs = this.buildStatus;
+    let showStepPercentage = false;
+    if (this._buildDescriptions) {
+      let index = Math.floor(value * this._buildDescriptions.length);
+      currentBuildDescription = this._buildDescriptions[index];
+      bs = (value - (index * (1 / this._buildDescriptions.length))) / (1 / this._buildDescriptions.length)
+      showStepPercentage = this._buildDescriptions.length > 1
+    }
+
     if (this.buildStatus == 0) {
       UI_displayText(this.name, 'buildStatus', '');
     } else {
-      UI_displayText(this.name, 'buildStatus', `+${formatNumberToString(this.buildQueue[0], 2)} [${formatNumberToString(Math.round(this.buildStatus * 100), 0, -1)}%] ${queueString} ${itemOverflowText}`);
+      UI_displayText(this.name, 'buildStatus', `+${formatNumberToString(this.buildQueue[0], 2)} [${formatNumberToString(Math.round(this.buildStatus * 100), 0, -1)}%: ${currentBuildDescription}${showStepPercentage ? ' <' + formatNumberToString(Math.round(bs * 100), 0, -1) + '%>' : ''}] ${queueString} ${itemOverflowText}`);
     }
   }
 

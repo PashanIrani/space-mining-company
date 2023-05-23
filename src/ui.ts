@@ -258,7 +258,7 @@ export function UI_displayStaffMembers(members: StaffMember[], onFireCallback: F
     const fireButton = document.getElementById(`staff-fire-button-${member.id}`);
     fireButton.addEventListener('click', () => {
       onFireCallback(member.id);
-      UI_log(`${member.name.firstName} ${member.name.lastName} as been relieved of ${member.gender == 0 ? 'his' : member.gender == 1 ? 'her' : 'their'} services.`)
+      UI_log(`${member.name.firstName} ${member.name.lastName} as been relieved of ${member.gender == 0 ? 'his' : member.gender == 1 ? 'her' : 'their'} duties.`)
     });
     member.UI_triggerUpdate();
   }
