@@ -6,7 +6,7 @@ const MAX_MINUTE = 59;
 const MAX_HOUR = 23;
 const MAX_MONTH = 12;
 
-export const TIME_TICK_SPEED = 1000 * 0.2083; // 5 Mins per day
+export const TIME_TICK_SPEED = 240; // 5 Mins per day
 export class Time {
   static _minute: number;
   static _hour: number;
@@ -47,7 +47,7 @@ export class Time {
     }
 
     this._minute = value;
-    UI_displayText('time', 'formattedTime', this.getFormatedTime());
+    UI_displayText('time', 'formattedTime', `${this.getFormatedTime()}`);
   }
 
   static get hour() {
@@ -75,7 +75,7 @@ export class Time {
       this.month++;
     }
     this._day = value;
-    UI_displayText('time', 'formattedDate', this.getFormatedDate());
+    UI_displayText('time', 'formattedDate', `${this.getFormatedDate()}(${this.seasonName(this.month)})`);
   }
 
   static get month() {
@@ -207,5 +207,32 @@ export class Time {
   static isLeapYear(year: number): boolean {
     return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
   }
+
+  static seasonName(month: number = 1): string {
+    // Define the start and end dates for each season
+    const seasons = [
+      { name: "Solstice", start: { month: 3, day: 21 }, end: { month: 6, day: 20 } },  // Spring
+      { name: "Sunfire", start: { month: 6, day: 21 }, end: { month: 9, day: 20 } },   // Summer
+      { name: "Moonshade", start: { month: 9, day: 21 }, end: { month: 12, day: 20 } }, // Autumn
+      { name: "Frostfall", start: { month: 12, day: 21 }, end: { month: 12, day: 31 } }, // Winter
+      { name: "Frostfall", start: { month: 1, day: 1 }, end: { month: 2, day: 20 } },    // Winter (continued)
+      { name: "Starborn", start: { month: 2, day: 21 }, end: { month: 2, day: 28 } },    // Stardust Festival
+      { name: "Gloomcrest", start: { month: 5, day: 1 }, end: { month: 5, day: 31 } },    // Shadowmoon Eclipse
+      { name: "Aetherlight", start: { month: 8, day: 1 }, end: { month: 8, day: 31 } },   // Celestial Ascendance
+      { name: "Eternal Twilight", start: { month: 11, day: 1 }, end: { month: 11, day: 30 } }, // Veil of Shadows
+    ];
+
+    console.log();
+
+    // Find the season that matches the given date
+    const matchedSeason = seasons.find(season =>
+      (month === season.start.month) ||
+      (month === season.end.month)
+    );
+
+    // Return the name of the matched season or "Unknown Season" if no match is found
+    return matchedSeason ? matchedSeason.name : "Unknown Season";
+  }
+
 
 }

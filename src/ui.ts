@@ -274,7 +274,7 @@ export function UI_calculateSunBrightness(hour: number, minute: number) {
 
   // document.body.style.filter = "grayscale(" + (sunBrightness * 0.4) + ")";
   // Define the start and end colors
-  var startColor = [1, 1, 1]; // RGB values for #3c6ea5
+  var startColor = [45, 82, 123]; // RGB values for #3c6ea5
   var endColor = [60, 110, 165]; // RGB values for #010101
 
   // Calculate the intermediate color values

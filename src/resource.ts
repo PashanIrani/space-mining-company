@@ -151,8 +151,15 @@ export class Resource {
         timeLeftText = `${convertTime(((this.capacity - this.amount) / rate))} to full`;
       }
 
+      let rateWithSymbol = ''
 
-      UI_displayText(this.name, 'rate', `${rate > 0 ? '+' : ''}${formatNumberToString(rate, 3)}${this.unitSymbol}/s ${timeLeftText != null ? `(${timeLeftText})` : ''}`);
+      if (this.unitSymbol.infront) {
+        rateWithSymbol = `${this.unitSymbol.icon}${formatNumberToString(rate, 3)}`;
+      } else {
+        rateWithSymbol = `${formatNumberToString(rate, 3)}${this.unitSymbol.icon}`;
+
+      }
+      UI_displayText(this.name, 'rate', `${rate > 0 ? '+' : ''}${rateWithSymbol}/s ${timeLeftText != null ? `(${timeLeftText})` : ''}`);
       prevValue = this.amount;
     }, 1000);
   }
