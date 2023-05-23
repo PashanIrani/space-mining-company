@@ -49,7 +49,7 @@ const labor = new Resource({
   timeToBuildMs: 150,
   holdToGenerateAmount: 0,
   enabled: true,
-  unit_symbol: 'w',
+  unitSymbol: { icon: 'w', infront: false },
   buildDescriptions: ['Identify Task', 'Plan Approach', 'Gather Tools', 'Prepare Work Area', 'Measure & Calculate', 'Position & Align', 'Lift & Carry', 'Install & Mount', 'Test & Verify', 'Mark Complete']
 });
 
@@ -69,7 +69,7 @@ const energyGroup = new GroupResource({
   name: 'energyGroup',
   label: 'Energy',
   groupResources: [{ resource: labor, multiplier: 1 }],
-  unit_symbol: 'E'
+  unitSymbol: { icon: 'E', infront: false },
 });
 
 const funds = new Resource({
@@ -82,7 +82,8 @@ const funds = new Resource({
   timeToBuildMs: DEV ? 300 : 3000,
   enabled: false,
   buildDescriptions: ['Analyzing Market', 'Executing Plan', 'Generating Funds'],
-  unit_symbol: '§'
+  unitSymbol: { icon: '$', infront: true },
+
 });
 
 export const staff = new StaffResource({

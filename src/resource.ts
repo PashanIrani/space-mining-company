@@ -4,6 +4,10 @@ import { convertTime, formatNumberToString } from "./helpers";
 import { Time } from "./time";
 import { ALL_RESOURCES } from ".";
 
+export interface unitSymbolDefination {
+  icon: string,
+  infront: boolean,
+}
 export interface ResourceDefination {
   name: string; // name is used for linking things together
   label: string // name shown on screen
@@ -18,7 +22,7 @@ export interface ResourceDefination {
   timeCost?: number; // amount of time incremented per generation
   enabled: boolean; // true is resource has been introduced to player, false if not
   buildDescriptions?: string[]; // a description of the build
-  unit_symbol?: string;
+  unitSymbol?: unitSymbolDefination;
 }
 
 export type AllResourceDefination = { [key: string]: Resource };
@@ -27,7 +31,7 @@ export interface GroupResouceDefination {
   name: string,
   label: string // name shown on screen
   groupResources: { resource: Resource, multiplier: number }[],
-  unit_symbol: string
+  unitSymbol: unitSymbolDefination
 }
 
 // checks if all the costs are met
@@ -77,7 +81,7 @@ export class Resource {
   private _timeCost: number;
   private _enabled: boolean;
 
-  private _unit_symbol: string;
+  private _unit_symbol: unitSymbolDefination;
 
   public buildQueue: number[] = []; // keeps track of builds being queued and how much amount to generate, incase generateAmount changes while still in queue
   private onAmountUpdateCallbacks: Function[] = []; // holds functions that need to be called when amount is updated.
@@ -102,7 +106,7 @@ export class Resource {
     this.timeCost = defination.timeCost || 0;
     this.enabled = defination.enabled;
 
-    this.unitSymbol = defination.unit_symbol || '';
+    this.unitSymbol = defination.unitSymbol;
     this._buildDescriptions = defination.buildDescriptions || null;
 
     this.assignEventListeners();
@@ -204,7 +208,13 @@ export class Resource {
     this.onAmountUpdateCallbacks.forEach(fn => fn());
 
     UI_updateProgressBar(this.name, this.amount, this.capacity);
-    UI_displayText(this.name, 'amount', formatNumberToString(this.amount, 2) + this._unit_symbol)
+
+    if (this.unitSymbol.infront) {
+
+      UI_displayText(this.name, 'amount', this.unitSymbol.icon + formatNumberToString(this.amount, 2))
+    } else {
+      UI_displayText(this.name, 'amount', formatNumberToString(this.amount, 2) + this.unitSymbol.icon)
+    }
   }
 
   get capacity(): number {
@@ -213,8 +223,13 @@ export class Resource {
 
   set capacity(value: number) {
     this._capacity = value;
-    if (!(value !== 0 && !value))
-      UI_displayText(this.name, 'capacity', formatNumberToString(this.capacity, 2) + this._unit_symbol)
+    if (!(value !== 0 && !value)) {
+      if (this.unitSymbol.infront) {
+        UI_displayText(this.name, 'capacity', this.unitSymbol.icon + formatNumberToString(this.capacity, 2))
+      } else {
+        UI_displayText(this.name, 'capacity', formatNumberToString(this.capacity, 2) + this.unitSymbol.icon)
+      }
+    }
     UI_updateProgressBar(this.name, this.amount, this.capacity);
   }
 
@@ -244,15 +259,16 @@ export class Resource {
     UI_displayText(this.name, 'label', this.label);
   }
 
-  get unitSymbol(): string {
-    return this._unit_symbol || '';
+  get unitSymbol(): unitSymbolDefination {
+    return this._unit_symbol || { icon: '', infront: false };
   }
 
-  set unitSymbol(value: string) {
+  set unitSymbol(value: unitSymbolDefination) {
     this._unit_symbol = value;
     this.amount = this.amount;
     this.capacity = this.capacity;
     this.costs = this.costs;
+    this.generateAmount = this.generateAmount;
   }
 
   get costs(): Cost[] {
@@ -279,8 +295,18 @@ export class Resource {
 
   set generateAmount(value: number) {
     this._generateAmount = value;
-    if (!(value !== 0 && !value))
-      UI_displayText(this.name, 'generate-amount', formatNumberToString(value, 2) + this.unitSymbol)
+    if (!(value !== 0 && !value)) {
+
+      if (this.unitSymbol.infront) {
+        console.log('huh' + this.unitSymbol.infront, this.unitSymbol.icon + formatNumberToString(value, 2));
+
+        UI_displayText(this.name, 'generate-amount', this.unitSymbol.icon + formatNumberToString(value, 2));
+      } else {
+
+        console.log('huiiiiiiih' + this.unitSymbol.infront, formatNumberToString(value, 2) + this.unitSymbol.icon);
+        UI_displayText(this.name, 'generate-amount', formatNumberToString(value, 2) + this.unitSymbol.icon)
+      }
+    }
   }
 
   get timeToBuildMs(): number {
@@ -319,10 +345,18 @@ export class Resource {
       showStepPercentage = this._buildDescriptions.length > 1
     }
 
+
     if (this.buildStatus == 0) {
       UI_displayText(this.name, 'buildStatus', '');
     } else {
-      UI_displayText(this.name, 'buildStatus', `${itemOverflowText} ${queueString} +${formatNumberToString(this.buildQueue[0], 2)} [${index + 1}/${this._buildDescriptions.length}: ${currentBuildDescription} ${formatNumberToString(Math.round(bs * 100), 0, -1) + '%'}] `);
+      let rateText = '';
+      if (this.unitSymbol.infront) {
+
+        rateText = `+${this.unitSymbol.icon}${formatNumberToString(this.buildQueue[0], 2)}`
+      } else {
+        rateText = `+${formatNumberToString(this.buildQueue[0], 2)}${this.unitSymbol.icon}`
+      }
+      UI_displayText(this.name, 'buildStatus', `${itemOverflowText} ${queueString} ${rateText} [${index + 1}/${this._buildDescriptions.length}: ${currentBuildDescription} ${formatNumberToString(Math.round(bs * 100), 0, -1) + '%'}] `);
     }
   }
 
@@ -435,7 +469,7 @@ export class GroupResource extends Resource {
       costs: [],
       timeToBuildMs: 0,
       enabled: true,
-      unit_symbol: defination.unit_symbol
+      unitSymbol: defination.unitSymbol
     });
 
     this.groupResources = defination.groupResources;
@@ -484,7 +518,11 @@ export class GroupResource extends Resource {
       const groupResource = this._groupResources[i];
       if (groupResource.resource.enabled)
         displayString += `<li>1 ${groupResource.resource.label} -> ${groupResource.multiplier} ${this.label}</li>`
-      UI_displayText(this.name, `${groupResource.resource.name}-weight`, `${groupResource.multiplier}${this.unitSymbol} ${this.label}`)
+      if (this.unitSymbol.infront) {
+        UI_displayText(this.name, `${groupResource.resource.name}-weight`, `${this.unitSymbol.icon}${groupResource.multiplier} ${this.label}`)
+      } {
+        UI_displayText(this.name, `${groupResource.resource.name}-weight`, `${groupResource.multiplier}${this.unitSymbol.icon} ${this.label}`)
+      }
     }
     displayString += "</ul>"
 
