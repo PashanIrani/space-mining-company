@@ -9,7 +9,7 @@ import { StaffMember, StaffResource } from "./staff";
 
 // Check game version, if not equal, alert and reset game to avoid error
 // TODO: Once game is in stable version, remove this.
-export const GAME_VERSION = 1;
+export const GAME_VERSION = 0;
 const savedVersion = localStorage.getItem('version');
 if (savedVersion != null && JSON.parse(savedVersion) != GAME_VERSION) {
   alert("Game should will reset now since game versions don't match");
@@ -46,10 +46,11 @@ const labor = new Resource({
   generateAmount: DEV ? 10 : 1,
   capacity: 100,
   costs: [],
-  timeToBuildMs: 100,
+  timeToBuildMs: 150,
   holdToGenerateAmount: 0,
   enabled: true,
-  buildDescriptions: ['Working']
+  unit_symbol: 'w',
+  buildDescriptions: ['Identify Task', 'Plan Approach', 'Gather Tools', 'Prepare Work Area', 'Measure & Calculate', 'Position & Align', 'Lift & Carry', 'Install & Mount', 'Test & Verify', 'Mark Complete']
 });
 
 const coffee = new Resource({
@@ -67,7 +68,8 @@ const coffee = new Resource({
 const energyGroup = new GroupResource({
   name: 'energyGroup',
   label: 'Energy',
-  groupResources: [{ resource: labor, multiplier: 1 }]
+  groupResources: [{ resource: labor, multiplier: 1 }],
+  unit_symbol: 'E'
 });
 
 const funds = new Resource({
@@ -79,7 +81,8 @@ const funds = new Resource({
   costs: [{ resource: 'energyGroup', amount: 15 }],
   timeToBuildMs: DEV ? 300 : 3000,
   enabled: false,
-  buildDescriptions: ['Analyzing Market', 'Executing Plan', 'Generating Funds']
+  buildDescriptions: ['Analyzing Market', 'Executing Plan', 'Generating Funds'],
+  unit_symbol: '§'
 });
 
 export const staff = new StaffResource({
