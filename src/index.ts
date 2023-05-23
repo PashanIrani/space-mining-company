@@ -46,12 +46,12 @@ const labor = new Resource({
   generateAmount: DEV ? 10 : 1,
   capacity: 100,
   costs: [],
-  timeToBuildMs: 200,
+  timeToBuildMs: 100,
   holdToGenerateAmount: 0,
   enabled: true,
   unitSymbol: { icon: 'w', infront: false },
   // buildDescriptions: ['Identify Task', 'Plan Approach', 'Gather Tools', 'Prepare Work Area', 'Measure & Calculate', 'Position & Align', 'Lift & Carry', 'Install & Mount', 'Test & Verify', 'Mark Complete']
-  buildDescriptions: ['Identify Task', 'Plan Approach', 'Execute Task', 'Mark Complete']
+  buildDescriptions: ['Execute Task']
 });
 
 const coffee = new Resource({
