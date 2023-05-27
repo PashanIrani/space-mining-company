@@ -206,6 +206,23 @@ const store = new Store({
     purchased: false,
     dependsOn: 'main-enable-hiring',
     level: 0
+  },
+  'save-speed': {
+    displayName: 'Increase speed of backup',
+    displayDescription: "Decreases delay between backups by 1s.",
+    costs: [{ resource: 'funds', amount: 100 }, { resource: 'energyGroup', amount: 100 }],
+    onPurchase: (self: StoreItem) => {
+
+      if (SaveSystem.AUTO_SAVE_FREQ > 1) {
+        self.level += 1;
+        self.displayName = `Increase speed of backup (${self.level})`;
+        SaveSystem.AUTO_SAVE_FREQ -= 1000;
+        self.purchased = false;
+      }
+    },
+    purchased: false,
+    dependsOn: 'main-enable-stats',
+    level: 0
   }
 });
 
@@ -226,4 +243,3 @@ for (const key in ALL_RESOURCES) {
 setTimeout(() => {
   Store.reDraw();
 }, 10);
-

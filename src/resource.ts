@@ -369,7 +369,7 @@ export class Resource {
       if (this._buildDescriptions.length > 1) {
         countText = `${index + 1}/${this._buildDescriptions.length}: `;
       }
-      UI_displayText(this.name, 'buildStatus', `${itemOverflowText} ${queueString} ${rateText} [${countText}${currentBuildDescription} (${formatNumberToString(Math.round(bs * 100), 0, -1) + '%'})] `);
+      UI_displayText(this.name, 'buildStatus', `${itemOverflowText} ${queueString} ${rateText} [${countText}${formatNumberToString(Math.round(bs * 100), 0, -1) + '%'} ${currentBuildDescription}] `);
     }
   }
 

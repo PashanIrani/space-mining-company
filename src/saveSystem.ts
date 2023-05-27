@@ -5,6 +5,7 @@ import { GroupResource } from "./resource";
 import { StaffMember, TICKS_PER_SEC } from "./staff";
 import { Store, StoreItem } from "./store";
 import { Time } from "./time";
+import { UI_displayText } from "./ui";
 
 const RESOURCES = "resources";
 const LAST_SAVE = "last_save_time";
@@ -15,6 +16,7 @@ const TIME = "timeData";
 const NEW_GAME_TIME = "newGametimeData";
 const LOGS = "logs";
 const STAFF = "staff";
+const AUTOSAVEFREQ = "autoSaveFreq";
 
 interface ResourceData {
   amount: number,
@@ -33,7 +35,7 @@ interface ResourceDataCollection {
 }
 
 export class SaveSystem {
-  static readonly AUTO_SAVE_FREQ = 2000;
+  static AUTO_SAVE_FREQ = 3000; // can only be whole seconds, not .5s 
   static lastSaveTime: number;
 
 
@@ -53,12 +55,56 @@ export class SaveSystem {
     this.loadTime();
     this.loadStaff();
 
-    setInterval(() => {
-      this.saveAll();
-    }, this.AUTO_SAVE_FREQ);
+
+    this.timeTillNextSave = this.getSavedAutoSaveFreq() || this.AUTO_SAVE_FREQ;
 
     loadingScreen.parentNode.removeChild(loadingScreen);
 
+  }
+
+  static getSavedAutoSaveFreq(): number {
+    const autosaveFreqString = localStorage.getItem(AUTOSAVEFREQ);
+    const autosaveFreq = parseInt(autosaveFreqString, 10);
+
+    // Check if parsing was successful
+    if (!isNaN(autosaveFreq)) {
+      // Use the parsed number
+      return autosaveFreq;
+    }
+
+    return null;
+  }
+
+  static get timeTillNextSave(): number {
+    return this.AUTO_SAVE_FREQ;
+  }
+
+  static staticSaveInterval: NodeJS.Timeout;
+  static staticSaveTimerInterval: NodeJS.Timeout;
+
+  static set timeTillNextSave(value: number) {
+    this.AUTO_SAVE_FREQ = value;
+    let timeTillNextSave = this.AUTO_SAVE_FREQ;
+
+    clearInterval(this.staticSaveTimerInterval);
+    clearInterval(this.staticSaveInterval);
+
+    this.displaySecTillNextSave(timeTillNextSave);
+    this.staticSaveTimerInterval = setInterval(() => {
+      timeTillNextSave -= 1000;
+      if (timeTillNextSave <= 0) timeTillNextSave = this.AUTO_SAVE_FREQ;
+      this.displaySecTillNextSave(timeTillNextSave);
+    }, 1000);
+
+    this.staticSaveInterval = setInterval(() => {
+      this.saveAll();
+
+    }, this.AUTO_SAVE_FREQ);
+  }
+
+  static displaySecTillNextSave(timeTillNextSave: number) {
+    UI_displayText('save', 'time-till-next-save', `${timeTillNextSave / 1000} `)
+    UI_displayText('save', 'backup-status', `${timeTillNextSave === this.AUTO_SAVE_FREQ ? '[Backup in progress]' : '[Backup pending]'}`)
   }
 
   static saveAll() {
@@ -68,6 +114,8 @@ export class SaveSystem {
     this.saveTime();
     this.saveLog();
     this.saveStaff();
+
+    localStorage.setItem(AUTOSAVEFREQ, this.AUTO_SAVE_FREQ + '');
 
     // Save current Time
     localStorage.setItem(LAST_SAVE, new Date().getTime() + "");
