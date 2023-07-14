@@ -28,18 +28,23 @@ if (!SaveSystem.loadLog()) {
   UI_log("(____/          \\______)")
   UI_log("")
 
-  let loggedMessages = ["Energy is the essence of progress, and our world teeters on the brink of catastrophe.",
-    "To avert disaster, you must swiftly establish a space mining company.", "The cosmos holds untapped resources, and time is running out."]
+  let loggedMessages = [
+    { msg: "This game is very early in developement.", timestamp: false },
+    { msg: "Roughly 5% of the game progress has been implemented as of Jul 14, 2023", timestamp: false },
+    { msg: "", timestamp: false }, { msg: "", timestamp: false }
+  ]
 
   for (let i = 0; i < loggedMessages.length; i++) {
-    const msg = loggedMessages[i];
+    const msg = loggedMessages[i].msg;
+    const tsBool = loggedMessages[i].timestamp;
+
     setTimeout(() => {
-      UI_log(msg);
+      UI_log(msg, tsBool);
     }, 1000 * (i + 1));
 
     if (i == loggedMessages.length - 1) {
       setTimeout(() => {
-        UI_log("Click anywhere to begin...");
+        UI_log("Click anywhere to begin...", false);
 
         // Enable clicking
         document.getElementById(`log-screen-container`).addEventListener('click', () => {
@@ -92,6 +97,7 @@ const coffee = new Resource({
   timeToBuildMs: 10000,
   holdToGenerateAmount: 0,
   enabled: false,
+  buildDescriptions: ['Brewing']
 });
 
 const energyGroup = new GroupResource({
@@ -121,7 +127,7 @@ export const staff = new StaffResource({
   amount: 0,
   generateAmount: 1,
   capacity: 5,
-  costs: [{ resource: 'funds', amount: DEV ? 1 : 50 }],
+  costs: [{ resource: 'funds', amount: DEV ? 1 : 50 }, { resource: 'energyGroup', amount: DEV ? 1 : 150 }],
   timeToBuildMs: DEV ? 350 : 30000,
   enabled: false,
   buildDescriptions: ['Recruitment: Advertising', 'Recruitment: Receiving', 'Recruitment: Reviewing',

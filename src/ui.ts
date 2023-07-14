@@ -206,9 +206,9 @@ export function UI_drawStore(storeItems: StoreDefination) {
 }
 
 
-export function UI_log(text: string) {
+export function UI_log(text: string, showTimestamp: boolean = true) {
   let logScreenContainer = document.getElementById("log-screen-container");
-  document.getElementById("log-screen").innerHTML += `<br>${Time.getCurrentTimestamp()}${text}`;
+  document.getElementById("log-screen").innerHTML += `<br>${showTimestamp ? Time.getCurrentTimestamp() : ''}${text}`;
 
   logScreenContainer.scrollTop = logScreenContainer.scrollHeight;
 }
