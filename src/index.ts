@@ -28,31 +28,27 @@ if (!SaveSystem.loadLog()) {
   UI_log("(____/          \\______)")
   UI_log("")
 
-  setTimeout(() => {
-    UI_log("Energy is the essence of progress, and our world teeters on the brink of catastrophe.");
+  let loggedMessages = ["Energy is the essence of progress, and our world teeters on the brink of catastrophe.",
+    "To avert disaster, you must swiftly establish a space mining company.", "The cosmos holds untapped resources, and time is running out."]
 
+  for (let i = 0; i < loggedMessages.length; i++) {
+    const msg = loggedMessages[i];
     setTimeout(() => {
-      UI_log("To avert disaster, you must swiftly establish a space mining company.");
+      UI_log(msg);
+    }, 1000 * (i + 1));
 
+    if (i == loggedMessages.length - 1) {
       setTimeout(() => {
-        UI_log("The cosmos holds untapped resources, and time is running out.");
+        UI_log("Click anywhere to begin...");
 
-
-
-        setTimeout(() => {
-          UI_log("Click anywhere to begin...");
-
-          // Enable clicking
-          document.getElementById(`log-screen-container`).addEventListener('click', () => {
-            UI_consoleWindowedScreen();
-          })
-        }, 2000);
-      }, 2000);
-    }, 2000);
-
-  }, 2000);
+        // Enable clicking
+        document.getElementById(`log-screen-container`).addEventListener('click', () => {
+          UI_consoleWindowedScreen();
+        })
+      }, 1000 * (i + 2));
+    }
+  }
 } else {
-
   // Enable clicking
   document.getElementById(`log-screen-container`).addEventListener('click', () => {
     UI_consoleWindowedScreen();
@@ -239,23 +235,23 @@ const store = new Store({
     dependsOn: 'main-enable-hiring',
     level: 0
   },
-  'save-speed': {
-    displayName: 'Increase speed of backup',
-    displayDescription: "Decreases delay between backups by 1s.",
-    costs: [{ resource: 'funds', amount: 100 }, { resource: 'energyGroup', amount: 100 }],
-    onPurchase: (self: StoreItem) => {
+  // 'save-speed': {
+  //   displayName: 'Increase speed of backup',
+  //   displayDescription: "Decreases delay between backups by 1s.",
+  //   costs: [{ resource: 'funds', amount: 100 }, { resource: 'energyGroup', amount: 100 }],
+  //   onPurchase: (self: StoreItem) => {
 
-      if (SaveSystem.AUTO_SAVE_FREQ > 1) {
-        self.level += 1;
-        self.displayName = `Increase speed of backup (${self.level})`;
-        SaveSystem.AUTO_SAVE_FREQ -= 1000;
-        self.purchased = false;
-      }
-    },
-    purchased: false,
-    dependsOn: 'main-enable-stats',
-    level: 0
-  }
+  //     if (SaveSystem.AUTO_SAVE_FREQ > 1) {
+  //       self.level += 1;
+  //       self.displayName = `Increase speed of backup (${self.level})`;
+  //       SaveSystem.AUTO_SAVE_FREQ -= 1000;
+  //       self.purchased = false;
+  //     }
+  //   },
+  //   purchased: false,
+  //   dependsOn: 'main-enable-stats',
+  //   level: 0
+  // }
 });
 
 Store.reDraw();

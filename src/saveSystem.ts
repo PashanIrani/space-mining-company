@@ -35,7 +35,7 @@ interface ResourceDataCollection {
 }
 
 export class SaveSystem {
-  static AUTO_SAVE_FREQ = 3000; // can only be whole seconds, not .5s 
+  static AUTO_SAVE_FREQ = 10000; // can only be whole seconds, not .5s 
   static lastSaveTime: number;
 
 
