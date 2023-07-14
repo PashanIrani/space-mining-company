@@ -3,7 +3,7 @@ import { TIME_TICK_SPEED, Time } from './time'
 import './styles/index.scss';
 import { PacingManger } from "./pacingManager";
 import { Store, StoreItem } from "./store";
-import { UI_log, UI_showWindow } from "./ui";
+import { UI_consoleWindowedScreen, UI_log, UI_showWindow } from "./ui";
 import { SaveSystem } from "./saveSystem";
 import { StaffMember, StaffResource } from "./staff";
 
@@ -24,7 +24,39 @@ if (savedVersion == null) {
 }
 
 if (!SaveSystem.loadLog()) {
-  UI_log("Welcome to Space Mining Company!");
+  UI_log("\___\\SPACE MINING CO.\\__ ")
+  UI_log("(____/          \\______)")
+  UI_log("")
+
+  setTimeout(() => {
+    UI_log("Energy is the essence of progress, and our world teeters on the brink of catastrophe.");
+
+    setTimeout(() => {
+      UI_log("To avert disaster, you must swiftly establish a space mining company.");
+
+      setTimeout(() => {
+        UI_log("The cosmos holds untapped resources, and time is running out.");
+
+
+
+        setTimeout(() => {
+          UI_log("Click anywhere to begin...");
+
+          // Enable clicking
+          document.getElementById(`log-screen-container`).addEventListener('click', () => {
+            UI_consoleWindowedScreen();
+          })
+        }, 2000);
+      }, 2000);
+    }, 2000);
+
+  }, 2000);
+} else {
+
+  // Enable clicking
+  document.getElementById(`log-screen-container`).addEventListener('click', () => {
+    UI_consoleWindowedScreen();
+  })
 }
 
 // INIT TIME

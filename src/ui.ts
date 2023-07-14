@@ -63,6 +63,20 @@ let lastStoreState: {
   }
 } = null;
 
+export function UI_consoleFullScreen() {
+  const element = document.getElementById(`log-screen-container`);
+
+  element.classList.add('full-screen')
+  element.scrollTop = element.scrollHeight;
+
+}
+
+export function UI_consoleWindowedScreen() {
+  const element = document.getElementById(`log-screen-container`);
+  element.classList.remove('full-screen');
+  element.scrollTop = element.scrollHeight;
+}
+
 export function UI_drawStore(storeItems: StoreDefination) {
 
 

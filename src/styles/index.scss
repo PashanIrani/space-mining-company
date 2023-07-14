@@ -304,3 +304,14 @@ span.cost-cant-afford {
   padding-left: 10px;
   opacity: 0.75;
 }
+
+#log-screen-container.full-screen {
+  width: 101vw;
+  height: 101vh;
+  padding: 22px;
+  max-height: unset;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+}

@@ -1,5 +1,5 @@
 import { Resource } from "./resource";
-import { UI_hideWindow, UI_shakeScreen, UI_showWindow } from "./ui";
+import { UI_consoleFullScreen, UI_hideWindow, UI_shakeScreen, UI_showWindow } from "./ui";
 
 export class PacingManger {
   static _resources: any;
@@ -10,10 +10,14 @@ export class PacingManger {
 
     this.introducedWindows = [];
 
-    let hideWindows = [this._resources.funds.name, 'store', this._resources.coffee.name, 'stats', 'staff'];
+    let hideWindows = [this._resources.funds.name, 'store', this._resources.coffee.name, 'stats', 'staff', 'game'];
 
     for (let i = 0; i < hideWindows.length; i++) {
       if (this.introducedWindows.includes(hideWindows[i])) continue;
+      if (hideWindows[i] === 'game') {
+        UI_consoleFullScreen();
+      }
+
       UI_hideWindow(hideWindows[i]);
     }
 
